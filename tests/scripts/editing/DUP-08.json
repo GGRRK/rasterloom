@@ -1,0 +1,13 @@
+{
+  "canvas": {"w": 64, "h": 64, "bg": "#00000000"},
+  "ops": [
+    {"op": "add_layer", "id": "k", "fill": "gradient", "from": "#2040C0FF", "to": "#F0C020FF", "dir": "h"},
+    {"op": "add_adjustment", "id": "a", "type": "posterize", "params": {"levels": 3}},
+    {"op": "set_fill", "layer": "a", "value": 0.5},
+    {"op": "duplicate_layer", "layer": "a", "id": "a2"},
+    {"op": "undo"},
+    {"op": "duplicate_layer", "layer": "a", "id": "a2"},
+    {"op": "set_adjustment", "layer": "a2", "params": {"levels": 6}}
+  ],
+  "out": "png8"
+}

@@ -1,0 +1,10 @@
+{
+  "canvas": {"w": 256, "h": 256, "bg": "#00000000"},
+  "ops": [
+    {"op": "add_layer", "id": "b", "fill": "gradient", "from": "#00FFFFFF", "to": "#FF0000FF", "dir": "h"},
+    {"op": "add_layer", "id": "s", "fill": "gradient", "from": "#0000FFFF", "to": "#FFFF00FF", "dir": "v"},
+    {"op": "set_opacity", "layer": "s", "value": 0.5},
+    {"op": "set_blend", "layer": "s", "mode": "over", "seed": 7}
+  ],
+  "out": "png8"
+}

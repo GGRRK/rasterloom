@@ -1,0 +1,13 @@
+{
+  "canvas": {"w": 64, "h": 64, "bg": "#00000000"},
+  "ops": [
+    {"op": "add_layer", "id": "src", "fill": "gradient", "from": "#FF000000", "to": "#FF0000FF", "dir": "h", "rect": [8, 0, 48, 64]},
+    {"op": "add_mask", "layer": "src", "fill": "noise", "seed": 3},
+    {"op": "set_opacity", "layer": "src", "value": 0.3},
+    {"op": "set_visible", "layer": "src", "value": false},
+    {"op": "add_layer", "id": "L"},
+    {"op": "select_alpha", "layer": "src"},
+    {"op": "fill_selection", "layer": "L", "color": "#1060e0ff"}
+  ],
+  "out": "png8"
+}

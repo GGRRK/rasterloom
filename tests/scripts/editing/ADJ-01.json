@@ -1,0 +1,10 @@
+{
+  "canvas": {"w": 64, "h": 64, "bg": "#00000000"},
+  "ops": [
+    {"op": "add_layer", "id": "k", "fill": "gradient", "from": "#2040C0FF", "to": "#F0C020FF", "dir": "h"},
+    {"op": "add_adjustment", "id": "a", "type": "levels", "params": {"rgb": {"in_black": 40, "gamma": 1.6}}},
+    {"op": "set_adjustment", "layer": "a", "params": {"rgb": {"in_white": 200}}}
+  ],
+  "out": "png8",
+  "equal_to": "ADJ-01R"
+}

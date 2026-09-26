@@ -1,0 +1,10 @@
+{
+  "canvas": {"w": 256, "h": 16, "bg": "#00000000"},
+  "ops": [
+    {"op": "add_layer", "id": "base", "fill": "gradient", "from": "#000000ff", "to": "#ffffffff", "dir": "h"},
+    {"op": "add_adjustment", "id": "adj", "type": "invert"},
+    {"op": "filter_gaussian_blur", "layer": "adj", "radius": 2.0}
+  ],
+  "out": "png8",
+  "expect": "error"
+}

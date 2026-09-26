@@ -1,0 +1,10 @@
+{
+  "canvas": {"w": 128, "h": 128, "bg": "#00000000"},
+  "ops": [
+    {"op": "add_layer", "id": "k", "fill": "gradient", "from": "#2040C0FF", "to": "#F0C020FF", "dir": "h"},
+    {"op": "add_layer", "id": "base", "fill": "gradient", "from": "#FF000000", "to": "#FF0000FF", "dir": "v", "rect": [16, 16, 96, 96]},
+    {"op": "add_adjustment", "id": "inv", "type": "invert"},
+    {"op": "set_clip", "layer": "inv", "value": true}
+  ],
+  "out": "png8"
+}

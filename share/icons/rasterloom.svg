@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- SPDX-License-Identifier: GPL-3.0-or-later -->
+<!-- Rasterloom application icon (original artwork): a four-by-four weave - warm warp, cool weft -
+     whose weft threads leave the loom as pixels. -->
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#252d3d"/>
+      <stop offset="1" stop-color="#10141c"/>
+    </linearGradient>
+  </defs>
+  <rect x="12" y="12" width="232" height="232" rx="52" fill="url(#bg)"/>
+  <g id="weft">
+    <rect x="38" y="49" width="156" height="26" rx="6" fill="#3fd0c9" stroke="#141923" stroke-width="5"/>
+    <rect x="38" y="89" width="156" height="26" rx="6" fill="#3aa8e0" stroke="#141923" stroke-width="5"/>
+    <rect x="38" y="129" width="156" height="26" rx="6" fill="#4f84f2" stroke="#141923" stroke-width="5"/>
+    <rect x="38" y="169" width="156" height="26" rx="6" fill="#6d6af0" stroke="#141923" stroke-width="5"/>
+  </g>
+  <g id="warp">
+    <rect x="49" y="38" width="26" height="180" rx="6" fill="#ffb547" stroke="#141923" stroke-width="5"/>
+    <rect x="89" y="38" width="26" height="180" rx="6" fill="#ff9245" stroke="#141923" stroke-width="5"/>
+    <rect x="129" y="38" width="26" height="180" rx="6" fill="#f5714f" stroke="#141923" stroke-width="5"/>
+    <rect x="169" y="38" width="26" height="180" rx="6" fill="#e2566a" stroke="#141923" stroke-width="5"/>
+  </g>
+  <g id="weft-over">
+    <rect x="43" y="89" width="38" height="26" fill="#3aa8e0" stroke="#141923" stroke-width="5" stroke-dasharray="38 26 38 26"/>
+    <rect x="43" y="169" width="38" height="26" fill="#6d6af0" stroke="#141923" stroke-width="5" stroke-dasharray="38 26 38 26"/>
+    <rect x="83" y="49" width="38" height="26" fill="#3fd0c9" stroke="#141923" stroke-width="5" stroke-dasharray="38 26 38 26"/>
+    <rect x="83" y="129" width="38" height="26" fill="#4f84f2" stroke="#141923" stroke-width="5" stroke-dasharray="38 26 38 26"/>
+    <rect x="123" y="89" width="38" height="26" fill="#3aa8e0" stroke="#141923" stroke-width="5" stroke-dasharray="38 26 38 26"/>
+    <rect x="123" y="169" width="38" height="26" fill="#6d6af0" stroke="#141923" stroke-width="5" stroke-dasharray="38 26 38 26"/>
+    <rect x="163" y="49" width="38" height="26" fill="#3fd0c9" stroke="#141923" stroke-width="5" stroke-dasharray="38 26 38 26"/>
+    <rect x="163" y="129" width="38" height="26" fill="#4f84f2" stroke="#141923" stroke-width="5" stroke-dasharray="38 26 38 26"/>
+  </g>
+  <g id="pixels">
+    <rect x="202" y="55" width="14" height="14" rx="2" fill="#3fd0c9" opacity="1"/>
+    <rect x="222" y="57.5" width="9" height="9" rx="2" fill="#3fd0c9" opacity="0.75"/>
+    <rect x="202" y="95" width="14" height="14" rx="2" fill="#3aa8e0" opacity="1"/>
+    <rect x="202" y="135" width="14" height="14" rx="2" fill="#4f84f2" opacity="1"/>
+    <rect x="222" y="137.5" width="9" height="9" rx="2" fill="#4f84f2" opacity="0.75"/>
+    <rect x="202" y="175" width="14" height="14" rx="2" fill="#6d6af0" opacity="1"/>
+  </g>
+</svg>

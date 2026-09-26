@@ -1,0 +1,10 @@
+{
+  "canvas": {"w": 64, "h": 64, "bg": "#00000000"},
+  "ops": [
+    {"op": "add_layer", "id": "L"},
+    {"op": "add_group", "id": "G"},
+    {"op": "select_wand", "layer": "G", "x": 4, "y": 4}
+  ],
+  "out": "png8",
+  "expect": "error"
+}

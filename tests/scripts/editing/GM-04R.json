@@ -1,0 +1,10 @@
+{
+  "canvas": {"w": 64, "h": 64, "bg": "#00000000"},
+  "ops": [
+    {"op": "add_layer", "id": "k", "fill": "gradient", "from": "#2040C0FF", "to": "#F0C020FF", "dir": "h"},
+    {"op": "add_group", "id": "g"},
+    {"op": "add_layer", "id": "c", "parent": "g", "fill": "solid", "color": "#E03020FF", "rect": [16, 16, 32, 32]},
+    {"op": "set_blend", "layer": "c", "mode": "mul"}
+  ],
+  "out": "png8"
+}

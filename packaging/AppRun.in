@@ -1,0 +1,69 @@
+#!/bin/sh
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# Rasterloom AppImage entry point (generated from packaging/AppRun.in by build-appimage.sh).
+#
+#   ./Rasterloom-x86_64.AppImage [FILE]            the editor
+#   ./Rasterloom-x86_64.AppImage --cli ARGS...     the headless renderer (rasterloom-cli)
+#   ./Rasterloom-x86_64.AppImage --version --verbose | --selftest | --license | ...
+#
+# 1. glibc floor. The bundle links against the build host's glibc; on an older one ld.so would
+#    fail with a cryptic "version `GLIBC_2.xx' not found". Check first and say it in words.
+# 2. RASTERLOOM_PLATFORM (BUILD-SPEC D6): the opt-in platform choice (xcb | wayland | offscreen).
+#    The binary applies it too; exporting QT_QPA_PLATFORM here also covers Qt's own early checks.
+# 3. QT_PLUGIN_PATH is dropped: a host path there would let this bundle's Qt try to load plugins
+#    built against the host's (usually newer) Qt.
+
+RL_GLIBC_FLOOR='@RL_GLIBC_FLOOR@'
+RL_GLIBC_SENTENCE='@RL_GLIBC_SENTENCE@'
+
+HERE=${APPDIR:-$(dirname "$(readlink -f "$0")")}
+
+rl_glibc_version() {
+    v=$(getconf GNU_LIBC_VERSION 2>/dev/null) && { echo "${v#glibc }"; return; }
+    ldd --version 2>/dev/null | sed -n '1s/.* \([0-9][0-9]*\.[0-9][0-9]*\)$/\1/p'
+}
+
+rl_version_lt() {  # $1 < $2 for dotted major.minor
+    a1=${1%%.*}; a2=${1#*.}; a2=${a2%%.*}
+    b1=${2%%.*}; b2=${2#*.}; b2=${b2%%.*}
+    [ "$a1" -lt "$b1" ] || { [ "$a1" -eq "$b1" ] && [ "$a2" -lt "$b2" ]; }
+}
+
+have=$(rl_glibc_version)
+case "$have" in
+    [0-9]*.[0-9]*) ;;
+    *) have="" ;;
+esac
+if [ -z "$have" ] || rl_version_lt "$have" "$RL_GLIBC_FLOOR"; then
+    echo "$RL_GLIBC_SENTENCE" >&2
+    if [ -n "$have" ]; then
+        echo "This system has glibc $have." >&2
+    else
+        echo "This system's C library is not glibc (or its version could not be read)." >&2
+    fi
+    exit 127
+fi
+
+if [ -n "$RASTERLOOM_PLATFORM" ]; then
+    QT_QPA_PLATFORM=$RASTERLOOM_PLATFORM
+    export QT_QPA_PLATFORM
+fi
+unset QT_PLUGIN_PATH
+
+# Hooks that linuxdeploy plugins may install (none with the Qt 6 plugin today).
+if [ -d "$HERE/apprun-hooks" ]; then
+    for hook in "$HERE"/apprun-hooks/*.sh; do
+        # shellcheck source=/dev/null
+        [ -f "$hook" ] && . "$hook"
+    done
+fi
+
+if [ "$1" = "--cli" ]; then
+    shift
+    exec "$HERE/usr/bin/rasterloom-cli" "$@"
+fi
+case "${ARGV0##*/}" in
+    rasterloom-cli*) exec "$HERE/usr/bin/rasterloom-cli" "$@" ;;
+esac
+exec "$HERE/usr/bin/rasterloom" "$@"

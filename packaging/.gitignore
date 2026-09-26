@@ -1,0 +1,4 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Downloaded, sha256-pinned tools and build output of build-appimage.sh.
+_tools/
+_out/

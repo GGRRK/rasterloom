@@ -1,0 +1,13 @@
+{
+  "canvas": {"w": 32, "h": 32, "bg": "#808080ff"},
+  "ops": [
+    {"op": "add_layer", "id": "L"},
+    {"op": "select_rect", "x": 4.0, "y": 4.0, "w": 8.0, "h": 24.0},
+    {"op": "fill_selection", "layer": "L", "color": "#ffffffff"},
+    {"op": "select_rect", "x": 12.0, "y": 4.0, "w": 8.0, "h": 24.0},
+    {"op": "fill_selection", "layer": "L", "color": "#000000ff"},
+    {"op": "deselect"},
+    {"op": "transform", "layer": "L", "scale": [2.3, 2.3], "pivot": [0.0, 0.0]}
+  ],
+  "out": "png8"
+}

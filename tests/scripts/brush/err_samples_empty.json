@@ -1,0 +1,9 @@
+{
+  "canvas": {"w": 64, "h": 64, "bg": "#00000000"},
+  "ops": [
+    {"op": "add_layer", "id": "L"},
+    {"op": "brush_stroke", "layer": "L", "samples": []}
+  ],
+  "out": "png8",
+  "expect": "error"
+}

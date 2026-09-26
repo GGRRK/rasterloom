@@ -1,0 +1,32 @@
+{
+ "_about": "Tile-allocation bounds checked by tests/tools/run_goldens.py via `rasterloom-cli --stats` (BUILD-SPEC <stack> Tile engine: 64x64 sparse tiles, shared all-zero empty tile for absent entries; mutation 13 = dense grid). Every bound is derived by hand from the script: the number of 64x64 tiles that the written rect touches (tiles tx in [floor(x0/64), floor((x0+w-1)/64)] clipped to the canvas, likewise ty), never measured from the app. `total` = ceil(W/64)*ceil(H/64) per plane. Keys: 'all', 'selection', 'saved-selection' or '<what>:<node id>' with what = pixels | mask.",
+ "expectations": {
+  "stats/sparse_rect_1024": {
+   "pixels:dot": {"max_allocated": 1, "total": 256},
+   "selection": {"max_allocated": 0, "total": 256},
+   "all": {"max_allocated": 1, "total": 512}
+  },
+  "stats/sparse_layers_2048": {
+   "pixels:tl": {"max_allocated": 1, "total": 1024},
+   "pixels:br": {"max_allocated": 1, "total": 1024},
+   "pixels:mid": {"max_allocated": 9, "total": 1024},
+   "pixels:none": {"max_allocated": 0, "total": 1024},
+   "all": {"max_allocated": 11, "total": 5120}
+  },
+  "stats/sparse_mask_1024": {
+   "pixels:dot": {"max_allocated": 8, "total": 256},
+   "mask:dot": {"max_allocated": 4, "total": 256},
+   "all": {"max_allocated": 12, "total": 768}
+  },
+  "stats/sparse_empty_4096": {
+   "pixels:e1": {"max_allocated": 0, "total": 4096},
+   "pixels:e2": {"max_allocated": 0, "total": 4096},
+   "all": {"max_allocated": 0, "total": 12288}
+  },
+  "stats/sparse_selection_1024": {
+   "pixels:dot": {"max_allocated": 1, "total": 256},
+   "selection": {"max_allocated": 4, "total": 256},
+   "all": {"max_allocated": 5, "total": 512}
+  }
+ }
+}

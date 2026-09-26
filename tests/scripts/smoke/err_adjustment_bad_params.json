@@ -1,0 +1,1 @@
+{"canvas": {"w": 16, "h": 16}, "ops": [{"op": "add_adjustment", "id": "lv", "type": "levels", "params": {"rgb": {"in_black": 200, "in_white": 200}}}], "out": "png8"}

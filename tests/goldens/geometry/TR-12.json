@@ -1,0 +1,11 @@
+{
+  "canvas": {"w": 64, "h": 64, "bg": "#ffffffff"},
+  "ops": [
+    {"op": "add_layer", "id": "L"},
+    {"op": "select_polygon", "points": [[12.0, 10.0], [50.0, 14.0], [44.0, 52.0], [16.0, 40.0]], "antialias": false},
+    {"op": "gradient", "layer": "L", "type": "linear", "p0": [8.0, 8.0], "p1": [56.0, 56.0], "c0": "#ff0000ff", "c1": "#0000ffff"},
+    {"op": "deselect"},
+    {"op": "transform", "layer": "L", "matrix": [1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.03, 1.0]}
+  ],
+  "out": "png8"
+}

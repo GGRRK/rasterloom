@@ -1,0 +1,665 @@
+{
+ "canvas": {
+  "w": 130,
+  "h": 100,
+  "bg": "#00000000"
+ },
+ "ops": [
+  {
+   "op": "add_layer",
+   "id": "b",
+   "fill": "noise",
+   "seed": 21,
+   "alpha": "random"
+  },
+  {
+   "op": "add_layer",
+   "id": "s0",
+   "fill": "noise",
+   "seed": 100,
+   "alpha": "random",
+   "rect": [
+    0,
+    0,
+    40,
+    40
+   ]
+  },
+  {
+   "op": "set_blend",
+   "layer": "s0",
+   "mode": "norm",
+   "seed": 7
+  },
+  {
+   "op": "set_opacity",
+   "layer": "s0",
+   "value": 0.75
+  },
+  {
+   "op": "add_layer",
+   "id": "s1",
+   "fill": "noise",
+   "seed": 101,
+   "alpha": "random",
+   "rect": [
+    10,
+    0,
+    40,
+    40
+   ]
+  },
+  {
+   "op": "set_blend",
+   "layer": "s1",
+   "mode": "diss",
+   "seed": 7
+  },
+  {
+   "op": "set_opacity",
+   "layer": "s1",
+   "value": 0.75
+  },
+  {
+   "op": "add_layer",
+   "id": "s2",
+   "fill": "noise",
+   "seed": 102,
+   "alpha": "random",
+   "rect": [
+    20,
+    0,
+    40,
+    40
+   ]
+  },
+  {
+   "op": "set_blend",
+   "layer": "s2",
+   "mode": "dark",
+   "seed": 7
+  },
+  {
+   "op": "set_opacity",
+   "layer": "s2",
+   "value": 0.75
+  },
+  {
+   "op": "add_layer",
+   "id": "s3",
+   "fill": "noise",
+   "seed": 103,
+   "alpha": "random",
+   "rect": [
+    30,
+    0,
+    40,
+    40
+   ]
+  },
+  {
+   "op": "set_blend",
+   "layer": "s3",
+   "mode": "mul",
+   "seed": 7
+  },
+  {
+   "op": "set_opacity",
+   "layer": "s3",
+   "value": 0.75
+  },
+  {
+   "op": "add_layer",
+   "id": "s4",
+   "fill": "noise",
+   "seed": 104,
+   "alpha": "random",
+   "rect": [
+    40,
+    0,
+    40,
+    40
+   ]
+  },
+  {
+   "op": "set_blend",
+   "layer": "s4",
+   "mode": "idiv",
+   "seed": 7
+  },
+  {
+   "op": "set_opacity",
+   "layer": "s4",
+   "value": 0.75
+  },
+  {
+   "op": "add_layer",
+   "id": "s5",
+   "fill": "noise",
+   "seed": 105,
+   "alpha": "random",
+   "rect": [
+    50,
+    0,
+    40,
+    40
+   ]
+  },
+  {
+   "op": "set_blend",
+   "layer": "s5",
+   "mode": "lbrn",
+   "seed": 7
+  },
+  {
+   "op": "set_opacity",
+   "layer": "s5",
+   "value": 0.75
+  },
+  {
+   "op": "add_layer",
+   "id": "s6",
+   "fill": "noise",
+   "seed": 106,
+   "alpha": "random",
+   "rect": [
+    60,
+    0,
+    40,
+    40
+   ]
+  },
+  {
+   "op": "set_blend",
+   "layer": "s6",
+   "mode": "dkCl",
+   "seed": 7
+  },
+  {
+   "op": "set_opacity",
+   "layer": "s6",
+   "value": 0.75
+  },
+  {
+   "op": "add_layer",
+   "id": "s7",
+   "fill": "noise",
+   "seed": 107,
+   "alpha": "random",
+   "rect": [
+    70,
+    0,
+    40,
+    40
+   ]
+  },
+  {
+   "op": "set_blend",
+   "layer": "s7",
+   "mode": "lite",
+   "seed": 7
+  },
+  {
+   "op": "set_opacity",
+   "layer": "s7",
+   "value": 0.75
+  },
+  {
+   "op": "add_layer",
+   "id": "s8",
+   "fill": "noise",
+   "seed": 108,
+   "alpha": "random",
+   "rect": [
+    80,
+    0,
+    40,
+    40
+   ]
+  },
+  {
+   "op": "set_blend",
+   "layer": "s8",
+   "mode": "scrn",
+   "seed": 7
+  },
+  {
+   "op": "set_opacity",
+   "layer": "s8",
+   "value": 0.75
+  },
+  {
+   "op": "add_layer",
+   "id": "s9",
+   "fill": "noise",
+   "seed": 109,
+   "alpha": "random",
+   "rect": [
+    0,
+    25,
+    40,
+    40
+   ]
+  },
+  {
+   "op": "set_blend",
+   "layer": "s9",
+   "mode": "div",
+   "seed": 7
+  },
+  {
+   "op": "set_opacity",
+   "layer": "s9",
+   "value": 0.75
+  },
+  {
+   "op": "add_layer",
+   "id": "s10",
+   "fill": "noise",
+   "seed": 110,
+   "alpha": "random",
+   "rect": [
+    10,
+    25,
+    40,
+    40
+   ]
+  },
+  {
+   "op": "set_blend",
+   "layer": "s10",
+   "mode": "lddg",
+   "seed": 7
+  },
+  {
+   "op": "set_opacity",
+   "layer": "s10",
+   "value": 0.75
+  },
+  {
+   "op": "add_layer",
+   "id": "s11",
+   "fill": "noise",
+   "seed": 111,
+   "alpha": "random",
+   "rect": [
+    20,
+    25,
+    40,
+    40
+   ]
+  },
+  {
+   "op": "set_blend",
+   "layer": "s11",
+   "mode": "lgCl",
+   "seed": 7
+  },
+  {
+   "op": "set_opacity",
+   "layer": "s11",
+   "value": 0.75
+  },
+  {
+   "op": "add_layer",
+   "id": "s12",
+   "fill": "noise",
+   "seed": 112,
+   "alpha": "random",
+   "rect": [
+    30,
+    25,
+    40,
+    40
+   ]
+  },
+  {
+   "op": "set_blend",
+   "layer": "s12",
+   "mode": "over",
+   "seed": 7
+  },
+  {
+   "op": "set_opacity",
+   "layer": "s12",
+   "value": 0.75
+  },
+  {
+   "op": "add_layer",
+   "id": "s13",
+   "fill": "noise",
+   "seed": 113,
+   "alpha": "random",
+   "rect": [
+    40,
+    25,
+    40,
+    40
+   ]
+  },
+  {
+   "op": "set_blend",
+   "layer": "s13",
+   "mode": "sLit",
+   "seed": 7
+  },
+  {
+   "op": "set_opacity",
+   "layer": "s13",
+   "value": 0.75
+  },
+  {
+   "op": "add_layer",
+   "id": "s14",
+   "fill": "noise",
+   "seed": 114,
+   "alpha": "random",
+   "rect": [
+    50,
+    25,
+    40,
+    40
+   ]
+  },
+  {
+   "op": "set_blend",
+   "layer": "s14",
+   "mode": "hLit",
+   "seed": 7
+  },
+  {
+   "op": "set_opacity",
+   "layer": "s14",
+   "value": 0.75
+  },
+  {
+   "op": "add_layer",
+   "id": "s15",
+   "fill": "noise",
+   "seed": 115,
+   "alpha": "random",
+   "rect": [
+    60,
+    25,
+    40,
+    40
+   ]
+  },
+  {
+   "op": "set_blend",
+   "layer": "s15",
+   "mode": "vLit",
+   "seed": 7
+  },
+  {
+   "op": "set_opacity",
+   "layer": "s15",
+   "value": 0.75
+  },
+  {
+   "op": "add_layer",
+   "id": "s16",
+   "fill": "noise",
+   "seed": 116,
+   "alpha": "random",
+   "rect": [
+    70,
+    25,
+    40,
+    40
+   ]
+  },
+  {
+   "op": "set_blend",
+   "layer": "s16",
+   "mode": "lLit",
+   "seed": 7
+  },
+  {
+   "op": "set_opacity",
+   "layer": "s16",
+   "value": 0.75
+  },
+  {
+   "op": "add_layer",
+   "id": "s17",
+   "fill": "noise",
+   "seed": 117,
+   "alpha": "random",
+   "rect": [
+    80,
+    25,
+    40,
+    40
+   ]
+  },
+  {
+   "op": "set_blend",
+   "layer": "s17",
+   "mode": "pLit",
+   "seed": 7
+  },
+  {
+   "op": "set_opacity",
+   "layer": "s17",
+   "value": 0.75
+  },
+  {
+   "op": "add_layer",
+   "id": "s18",
+   "fill": "noise",
+   "seed": 118,
+   "alpha": "random",
+   "rect": [
+    0,
+    50,
+    40,
+    40
+   ]
+  },
+  {
+   "op": "set_blend",
+   "layer": "s18",
+   "mode": "hMix",
+   "seed": 7
+  },
+  {
+   "op": "set_opacity",
+   "layer": "s18",
+   "value": 0.75
+  },
+  {
+   "op": "add_layer",
+   "id": "s19",
+   "fill": "noise",
+   "seed": 119,
+   "alpha": "random",
+   "rect": [
+    10,
+    50,
+    40,
+    40
+   ]
+  },
+  {
+   "op": "set_blend",
+   "layer": "s19",
+   "mode": "diff",
+   "seed": 7
+  },
+  {
+   "op": "set_opacity",
+   "layer": "s19",
+   "value": 0.75
+  },
+  {
+   "op": "add_layer",
+   "id": "s20",
+   "fill": "noise",
+   "seed": 120,
+   "alpha": "random",
+   "rect": [
+    20,
+    50,
+    40,
+    40
+   ]
+  },
+  {
+   "op": "set_blend",
+   "layer": "s20",
+   "mode": "smud",
+   "seed": 7
+  },
+  {
+   "op": "set_opacity",
+   "layer": "s20",
+   "value": 0.75
+  },
+  {
+   "op": "add_layer",
+   "id": "s21",
+   "fill": "noise",
+   "seed": 121,
+   "alpha": "random",
+   "rect": [
+    30,
+    50,
+    40,
+    40
+   ]
+  },
+  {
+   "op": "set_blend",
+   "layer": "s21",
+   "mode": "fsub",
+   "seed": 7
+  },
+  {
+   "op": "set_opacity",
+   "layer": "s21",
+   "value": 0.75
+  },
+  {
+   "op": "add_layer",
+   "id": "s22",
+   "fill": "noise",
+   "seed": 122,
+   "alpha": "random",
+   "rect": [
+    40,
+    50,
+    40,
+    40
+   ]
+  },
+  {
+   "op": "set_blend",
+   "layer": "s22",
+   "mode": "fdiv",
+   "seed": 7
+  },
+  {
+   "op": "set_opacity",
+   "layer": "s22",
+   "value": 0.75
+  },
+  {
+   "op": "add_layer",
+   "id": "s23",
+   "fill": "noise",
+   "seed": 123,
+   "alpha": "random",
+   "rect": [
+    50,
+    50,
+    40,
+    40
+   ]
+  },
+  {
+   "op": "set_blend",
+   "layer": "s23",
+   "mode": "hue",
+   "seed": 7
+  },
+  {
+   "op": "set_opacity",
+   "layer": "s23",
+   "value": 0.75
+  },
+  {
+   "op": "add_layer",
+   "id": "s24",
+   "fill": "noise",
+   "seed": 124,
+   "alpha": "random",
+   "rect": [
+    60,
+    50,
+    40,
+    40
+   ]
+  },
+  {
+   "op": "set_blend",
+   "layer": "s24",
+   "mode": "sat",
+   "seed": 7
+  },
+  {
+   "op": "set_opacity",
+   "layer": "s24",
+   "value": 0.75
+  },
+  {
+   "op": "add_layer",
+   "id": "s25",
+   "fill": "noise",
+   "seed": 125,
+   "alpha": "random",
+   "rect": [
+    70,
+    50,
+    40,
+    40
+   ]
+  },
+  {
+   "op": "set_blend",
+   "layer": "s25",
+   "mode": "colr",
+   "seed": 7
+  },
+  {
+   "op": "set_opacity",
+   "layer": "s25",
+   "value": 0.75
+  },
+  {
+   "op": "add_layer",
+   "id": "s26",
+   "fill": "noise",
+   "seed": 126,
+   "alpha": "random",
+   "rect": [
+    80,
+    50,
+    40,
+    40
+   ]
+  },
+  {
+   "op": "set_blend",
+   "layer": "s26",
+   "mode": "lum",
+   "seed": 7
+  },
+  {
+   "op": "set_opacity",
+   "layer": "s26",
+   "value": 0.75
+  }
+ ],
+ "out": "png8"
+}

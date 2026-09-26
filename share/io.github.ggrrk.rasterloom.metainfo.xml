@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- SPDX-License-Identifier: GPL-3.0-or-later -->
+<!-- AppStream metadata for Rasterloom. The metadata itself is licensed CC0-1.0. -->
+<component type="desktop-application">
+  <id>io.github.ggrrk.rasterloom</id>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>GPL-3.0-or-later</project_license>
+  <name>Rasterloom</name>
+  <summary>Layer-based raster image editor</summary>
+  <developer id="io.github.ggrrk">
+    <name>The Rasterloom authors</name>
+  </developer>
+  <description>
+    <p>
+      Rasterloom is a native Linux raster image editor. It works with real layers and groups,
+      layer masks and clipping masks, 27 blend modes plus pass-through groups, selections, a
+      pressure-sensitive brush, eraser and clone stamp, non-destructive adjustment layers,
+      filters and transforms.
+    </p>
+    <p>
+      It opens and saves OpenRaster (.ora) and its own .orp format, imports and exports layered
+      PSD and PSB files with a merged composite that other programs can read, and opens and
+      exports PNG, JPEG and TIFF.
+    </p>
+    <p>
+      Every pixel operation is tested byte-for-byte against an independently written reference
+      implementation. Rasterloom is an original program and is not affiliated with any other
+      image-editor vendor.
+    </p>
+  </description>
+  <url type="homepage">https://github.com/GGRRK/rasterloom</url>
+  <url type="bugtracker">https://github.com/GGRRK/rasterloom/issues</url>
+  <launchable type="desktop-id">rasterloom.desktop</launchable>
+  <icon type="stock">rasterloom</icon>
+  <categories>
+    <category>Graphics</category>
+    <category>2DGraphics</category>
+    <category>RasterGraphics</category>
+  </categories>
+  <keywords>
+    <keyword>image editor</keyword>
+    <keyword>layers</keyword>
+    <keyword>OpenRaster</keyword>
+    <keyword>PSD</keyword>
+  </keywords>
+  <provides>
+    <binary>rasterloom</binary>
+    <binary>rasterloom-cli</binary>
+    <mediatype>image/png</mediatype>
+    <mediatype>image/jpeg</mediatype>
+    <mediatype>image/tiff</mediatype>
+    <mediatype>image/openraster</mediatype>
+    <mediatype>image/vnd.adobe.photoshop</mediatype>
+  </provides>
+  <supports>
+    <control>pointing</control>
+    <control>keyboard</control>
+    <control>tablet</control>
+  </supports>
+  <requires>
+    <display_length compare="ge">768</display_length>
+  </requires>
+  <content_rating type="oars-1.1"/>
+  <releases>
+    <release version="0.1.0" date="2026-09-26" type="development">
+      <description>
+        <p>
+          First milestone ("Foundation"): layers, groups, masks, 27 blend modes, selections,
+          brush, eraser and clone stamp, eight adjustment layers, six filters, transforms,
+          history, and PSD/PSB, OpenRaster, PNG, JPEG and TIFF input and output.
+        </p>
+      </description>
+    </release>
+  </releases>
+</component>

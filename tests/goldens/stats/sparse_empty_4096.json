@@ -1,0 +1,6 @@
+{ "canvas": {"w": 4096, "h": 4096, "bg": "#336699FF"},
+  "ops": [ {"op": "add_layer", "id": "e1"},
+           {"op": "add_group", "id": "g"},
+           {"op": "add_layer", "id": "e2", "parent": "g", "fill": "solid", "color": "#FF0000", "rect": [5000, 5000, 10, 10]},
+           {"op": "set_opacity", "layer": "e1", "value": 0.5} ],
+  "out": "png8" }

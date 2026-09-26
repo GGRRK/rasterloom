@@ -1,0 +1,17 @@
+{
+  "canvas": {"w": 128, "h": 128, "bg": "#00000000"},
+  "ops": [
+    {"op": "add_layer", "id": "k", "fill": "gradient", "from": "#2040C0FF", "to": "#F0C020FF", "dir": "h"},
+    {"op": "add_layer", "id": "base", "fill": "gradient", "from": "#FF000000", "to": "#FF0000FF", "dir": "v", "rect": [16, 16, 96, 96]},
+    {"op": "add_layer", "id": "c", "fill": "noise", "seed": 5, "alpha": 255},
+    {"op": "set_clip", "layer": "c", "value": true},
+    {"op": "set_visible", "layer": "c", "value": false},
+    {"op": "add_layer", "id": "c2", "fill": "gradient", "from": "#00FF00FF", "to": "#0000FFFF", "dir": "h"},
+    {"op": "set_clip", "layer": "c2", "value": true},
+    {"op": "add_layer", "id": "base2", "fill": "gradient", "from": "#FFFFFFFF", "to": "#FFFFFF20", "dir": "h", "rect": [72, 8, 48, 112]},
+    {"op": "add_layer", "id": "c3", "fill": "noise", "seed": 17, "alpha": 255},
+    {"op": "set_clip", "layer": "c3", "value": true},
+    {"op": "set_visible", "layer": "base2", "value": false}
+  ],
+  "out": "png8"
+}

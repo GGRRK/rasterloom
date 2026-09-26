@@ -1,0 +1,11 @@
+{
+  "canvas": {"w": 64, "h": 64, "bg": "#00000000"},
+  "ops": [
+    {"op": "add_layer", "id": "L"},
+    {"op": "select_rect", "x": 22.0, "y": 24.0, "w": 20.0, "h": 16.0},
+    {"op": "fill_selection", "layer": "L", "color": "#2040a0ff"},
+    {"op": "deselect"},
+    {"op": "bucket_fill", "layer": "L", "x": 0, "y": 0, "color": "#ff8000ff", "tolerance": 0}
+  ],
+  "out": "png8"
+}

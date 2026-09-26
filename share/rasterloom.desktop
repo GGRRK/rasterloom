@@ -1,0 +1,15 @@
+[Desktop Entry]
+Type=Application
+Name=Rasterloom
+GenericName=Raster Image Editor
+Comment=Edit photos and artwork with layers, masks, selections and a pressure-sensitive brush
+Exec=rasterloom %f
+TryExec=rasterloom
+Icon=rasterloom
+Terminal=false
+Categories=Graphics;2DGraphics;RasterGraphics;Qt;
+Keywords=image;photo;layer;mask;brush;paint;raster;psd;openraster;
+MimeType=image/png;image/jpeg;image/tiff;image/openraster;image/vnd.adobe.photoshop;
+StartupNotify=true
+StartupWMClass=rasterloom
+X-AppImage-Name=Rasterloom

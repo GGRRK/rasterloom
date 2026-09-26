@@ -1,0 +1,12 @@
+{
+  "canvas": {"w": 64, "h": 64, "bg": "#00000000"},
+  "ops": [
+    {"op": "add_layer", "id": "L"},
+    {"op": "select_all"},
+    {"op": "contract", "by": 3},
+    {"op": "select_rect", "x": 20.0, "y": 20.0, "w": 24.0, "h": 24.0, "mode": "subtract"},
+    {"op": "contract", "by": 2},
+    {"op": "fill_selection", "layer": "L", "color": "#1060e0ff"}
+  ],
+  "out": "png8"
+}

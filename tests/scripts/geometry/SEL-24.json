@@ -1,0 +1,11 @@
+{
+  "canvas": {"w": 64, "h": 64, "bg": "#00000000"},
+  "ops": [
+    {"op": "add_layer", "id": "L"},
+    {"op": "select_rect", "x": 20.0, "y": 20.0, "w": 10.0, "h": 10.0},
+    {"op": "select_ellipse", "x": 40.0, "y": 8.0, "w": 12.0, "h": 12.0, "antialias": true, "mode": "add"},
+    {"op": "expand", "by": 4},
+    {"op": "fill_selection", "layer": "L", "color": "#1060e0ff"}
+  ],
+  "out": "png8"
+}

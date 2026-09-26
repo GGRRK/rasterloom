@@ -1,0 +1,12 @@
+{
+  "canvas": {"w": 128, "h": 128, "bg": "#808080FF"},
+  "ops": [
+    {"op": "add_layer", "id": "l1", "fill": "gradient", "from": "#2040C0FF", "to": "#F0C02080", "dir": "h"},
+    {"op": "add_layer", "id": "l2", "fill": "solid", "color": "#10E080FF", "rect": [32, 32, 64, 64]},
+    {"op": "set_visible", "layer": "l2", "value": false},
+    {"op": "add_layer", "id": "l3", "fill": "noise", "seed": 23, "alpha": "random", "rect": [48, 8, 72, 112]},
+    {"op": "merge_visible"},
+    {"op": "set_visible", "layer": "l2", "value": true}
+  ],
+  "out": "png8"
+}

@@ -1,0 +1,13 @@
+{
+  "canvas": {"w": 128, "h": 128, "bg": "#00000000"},
+  "ops": [
+    {"op": "add_layer", "id": "k", "fill": "gradient", "from": "#2040C0FF", "to": "#F0C020FF", "dir": "h"},
+    {"op": "add_layer", "id": "u", "fill": "gradient", "from": "#FF8040FF", "to": "#4080FF80", "dir": "v", "rect": [16, 16, 96, 96]},
+    {"op": "set_blend", "layer": "u", "mode": "mul"},
+    {"op": "set_opacity", "layer": "u", "value": 0.5},
+    {"op": "add_mask", "layer": "u", "fill": "gradient", "from": 0, "to": 255, "dir": "h"},
+    {"op": "merge_down", "layer": "u"},
+    {"op": "set_opacity", "layer": "k", "value": 0.8}
+  ],
+  "out": "png8"
+}

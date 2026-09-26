@@ -1,0 +1,197 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# What each shared library an AppImage can bundle IS: packaging/bundle_notices.py matches every
+# file in AppDir/usr/lib (and every Qt plugin) against `files` (Python regexes, full match on the
+# file name) and refuses to write THIRD-PARTY-NOTICES.md while any bundled library matches no
+# entry - add the entry, with its real license, and rebuild.
+#
+# Versions and license texts are NOT written here: they are read from the build host for the
+# exact file that was bundled (pacman on Arch, dpkg on Debian/Ubuntu, qmake for an aqtinstall Qt,
+# the build tree for ADS). `spdx` is the upstream license of the library as shipped by current
+# distributions; the embedded text is authoritative.
+#
+# `compiled_in` components ship inside the Rasterloom binaries themselves (header-only or static)
+# and are always listed.
+bundled:
+  - name: Qt
+    files: ['libQt6[A-Za-z]+\.so(\.[0-9.]+)?', 'plugin:.*']
+    spdx: LGPL-3.0-only
+    url: https://www.qt.io/
+    used_for: GUI toolkit (Core, Gui, Widgets, OpenGL, OpenGLWidgets, Svg, DBus, WaylandClient, XcbQpa and platform/image/icon plugins), dynamically linked
+  - name: Qt-Advanced-Docking-System
+    files: ['libqtadvanceddocking-qt6\.so(\.[0-9.]+)?']
+    spdx: LGPL-2.1-or-later
+    url: https://github.com/githubuser0xFFFF/Qt-Advanced-Docking-System
+    used_for: dockable panels, shared library
+  - name: ICU
+    files: ['libicu(data|i18n|uc)\.so(\.[0-9.]+)?']
+    spdx: Unicode-3.0 (ICU >= 74) / Unicode-DFS-2016 AND ICU (ICU 73)
+    url: https://icu.unicode.org/
+    used_for: Unicode support for Qt Core
+  - name: libpng
+    files: ['libpng16\.so(\.[0-9.]+)?']
+    spdx: libpng-2.0
+    url: http://www.libpng.org/pub/png/libpng.html
+    used_for: PNG import/export
+  - name: libjpeg-turbo
+    files: ['libjpeg\.so(\.[0-9.]+)?']
+    spdx: IJG AND BSD-3-Clause AND Zlib
+    url: https://libjpeg-turbo.org/
+    used_for: JPEG import/export, PSD JPEG thumbnails
+  - name: libtiff
+    files: ['libtiff\.so(\.[0-9.]+)?']
+    spdx: libtiff
+    url: https://libtiff.gitlab.io/libtiff/
+    used_for: TIFF import/export
+  - name: libdeflate
+    files: ['libdeflate\.so(\.[0-9.]+)?']
+    spdx: MIT
+    url: https://github.com/ebiggers/libdeflate
+    used_for: dependency of libtiff
+  - name: JBIG-KIT
+    files: ['libjbig\.so(\.[0-9.]+)?']
+    spdx: GPL-2.0-or-later
+    url: https://www.cl.cam.ac.uk/~mgk25/jbigkit/
+    used_for: dependency of libtiff
+  - name: LERC
+    files: ['libLerc\.so(\.[0-9.]+)?']
+    spdx: Apache-2.0
+    url: https://github.com/Esri/lerc
+    used_for: dependency of libtiff
+  - name: XZ Utils (liblzma)
+    files: ['liblzma\.so(\.[0-9.]+)?']
+    spdx: 0BSD (xz >= 5.6) / public domain (older releases)
+    url: https://tukaani.org/xz/
+    used_for: dependency of libtiff
+  - name: Zstandard
+    files: ['libzstd\.so(\.[0-9.]+)?']
+    spdx: BSD-3-Clause OR GPL-2.0-only
+    url: https://facebook.github.io/zstd/
+    used_for: dependency of libtiff and Qt Core
+  - name: libwebp
+    files: ['libwebp\.so(\.[0-9.]+)?', 'libwebpdemux\.so(\.[0-9.]+)?', 'libwebpmux\.so(\.[0-9.]+)?', 'libsharpyuv\.so(\.[0-9.]+)?']
+    spdx: BSD-3-Clause
+    url: https://chromium.googlesource.com/webm/libwebp
+    used_for: dependency of libtiff and the Qt WebP image plugin
+  - name: Little CMS (lcms2)
+    files: ['liblcms2\.so(\.[0-9.]+)?']
+    spdx: MIT
+    url: https://www.littlecms.com/
+    used_for: dependency of libmng (Qt MNG image plugin)
+  - name: libmng
+    files: ['libmng\.so(\.[0-9.]+)?']
+    spdx: LicenseRef-libmng (zlib-style)
+    url: https://sourceforge.net/projects/libmng/
+    used_for: Qt MNG image plugin
+  - name: JasPer
+    files: ['libjasper\.so(\.[0-9.]+)?']
+    spdx: JasPer-2.0
+    url: https://jasper-software.github.io/jasper/
+    used_for: Qt JPEG 2000 image plugin
+  - name: PCRE2
+    files: ['libpcre2-16\.so(\.[0-9.]+)?', 'libpcre2-8\.so(\.[0-9.]+)?']
+    spdx: BSD-3-Clause WITH PCRE2-exception
+    url: https://github.com/PCRE2Project/pcre2
+    used_for: regular expressions in Qt Core
+  - name: double-conversion
+    files: ['libdouble-conversion\.so(\.[0-9.]+)?']
+    spdx: BSD-3-Clause
+    url: https://github.com/google/double-conversion
+    used_for: number formatting in Qt Core
+  - name: libb2 (BLAKE2)
+    files: ['libb2\.so(\.[0-9.]+)?']
+    spdx: CC0-1.0
+    url: https://github.com/BLAKE2/libb2
+    used_for: hashing in Qt Core
+  - name: GCC OpenMP runtime (libgomp)
+    files: ['libgomp\.so(\.[0-9.]+)?']
+    spdx: GPL-3.0-or-later WITH GCC-exception-3.1
+    url: https://gcc.gnu.org/
+    used_for: dependency of libb2
+  - name: OpenSSL (libcrypto)
+    files: ['libcrypto\.so(\.[0-9.]+)?']
+    spdx: Apache-2.0
+    url: https://www.openssl.org/
+    used_for: dependency of Qt Core as built by the host distribution
+  - name: liburing
+    files: ['liburing\.so(\.[0-9.]+)?']
+    spdx: MIT OR LGPL-2.1-or-later
+    url: https://github.com/axboe/liburing
+    used_for: dependency of Qt Core as built by the host distribution
+  - name: Brotli
+    files: ['libbrotli(common|dec|enc)\.so(\.[0-9.]+)?']
+    spdx: MIT
+    url: https://github.com/google/brotli
+    used_for: dependency of FreeType/Qt
+  - name: MD4C
+    files: ['libmd4c\.so(\.[0-9.]+)?']
+    spdx: MIT
+    url: https://github.com/mity/md4c
+    used_for: Markdown support in Qt Gui
+  - name: libxkbcommon
+    files: ['libxkbcommon\.so(\.[0-9.]+)?', 'libxkbcommon-x11\.so(\.[0-9.]+)?']
+    spdx: MIT
+    url: https://xkbcommon.org/
+    used_for: keyboard handling (X11 and Wayland)
+  - name: libxcb extensions
+    files: ['libxcb-(glx|randr|render|shape|shm|sync|xfixes|xinput|xkb|dri2|dri3|present|xinerama)\.so(\.[0-9.]+)?']
+    spdx: X11
+    url: https://xcb.freedesktop.org/
+    used_for: X11 protocol extensions for the xcb platform plugin
+  - name: xcb-util family
+    files: ['libxcb-(cursor|icccm|image|keysyms|render-util|util|ewmh)\.so(\.[0-9.]+)?']
+    spdx: X11 / MIT
+    url: https://xcb.freedesktop.org/
+    used_for: helpers for the xcb platform plugin
+  - name: libXau / libXdmcp
+    files: ['libXau\.so(\.[0-9.]+)?', 'libXdmcp\.so(\.[0-9.]+)?']
+    spdx: MIT
+    url: https://www.x.org/
+    used_for: X11 authorisation
+  - name: libbsd / libmd
+    files: ['libbsd\.so(\.[0-9.]+)?', 'libmd\.so(\.[0-9.]+)?']
+    spdx: BSD-3-Clause AND others (see text)
+    url: https://libbsd.freedesktop.org/
+    used_for: dependency of libXdmcp
+  - name: libffi
+    files: ['libffi\.so(\.[0-9.]+)?']
+    spdx: MIT
+    url: https://sourceware.org/libffi/
+    used_for: dependency of GLib components
+  - name: HarfBuzz
+    files: ['libharfbuzz\.so(\.[0-9.]+)?']
+    spdx: MIT-Modern-Variant
+    url: https://harfbuzz.github.io/
+    used_for: text shaping in Qt Gui
+  - name: Graphite2
+    files: ['libgraphite2\.so(\.[0-9.]+)?']
+    spdx: LGPL-2.1-or-later OR MPL-2.0 OR GPL-2.0-or-later
+    url: https://github.com/silnrsi/graphite
+    used_for: dependency of HarfBuzz
+  - name: bzip2
+    files: ['libbz2\.so(\.[0-9.]+)?']
+    spdx: bzip2-1.0.6
+    url: https://sourceware.org/bzip2/
+    used_for: dependency of FreeType
+  - name: libgcrypt / libgpg-error
+    files: ['libgcrypt\.so(\.[0-9.]+)?', 'libgpg-error\.so(\.[0-9.]+)?']
+    spdx: LGPL-2.1-or-later
+    url: https://gnupg.org/software/libgcrypt/
+    used_for: dependency of host libraries
+  - name: LZ4
+    files: ['liblz4\.so(\.[0-9.]+)?']
+    spdx: BSD-2-Clause
+    url: https://lz4.org/
+    used_for: dependency of host libraries
+  - name: libcap
+    files: ['libcap\.so(\.[0-9.]+)?']
+    spdx: BSD-3-Clause OR GPL-2.0-only
+    url: https://sites.google.com/site/fullycapable/
+    used_for: dependency of host libraries
+
+compiled_in:
+  - name: JSON for Modern C++ (nlohmann-json)
+    spdx: MIT
+    url: https://github.com/nlohmann/json
+    used_for: render scripts and document.json (header-only, compiled into both binaries)
+    version_from: ["pkg-config:nlohmann_json"]
+    license_files: [/usr/share/licenses/nlohmann-json/LICENSE.MIT, /usr/share/doc/nlohmann-json3-dev/copyright]

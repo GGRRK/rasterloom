@@ -1,0 +1,1 @@
+{"canvas": {"w": 64, "h": 64, "bg": "#00000000"}, "ops": [{"op": "add_layer", "id": "L"}, {"op": "gradient", "layer": "L", "type": "angle", "p0": [0.0, 0.0], "p1": [10.0, 10.0], "c0": "#000000ff", "c1": "#ffffffff"}], "out": "png8"}

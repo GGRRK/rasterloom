@@ -1,0 +1,12 @@
+{
+  "canvas": {"w": 128, "h": 128, "bg": "#ffffffff"},
+  "ops": [
+    {"op": "add_layer", "id": "L"},
+    {"op": "select_ellipse", "x": 32.0, "y": 32.0, "w": 64.0, "h": 64.0, "antialias": true},
+    {"op": "feather", "radius": 6.0},
+    {"op": "fill_selection", "layer": "L", "color": "#ff2000ff"},
+    {"op": "deselect"},
+    {"op": "image_size", "w": 48, "h": 48}
+  ],
+  "out": "png8"
+}

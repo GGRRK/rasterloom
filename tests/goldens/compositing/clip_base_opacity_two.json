@@ -1,0 +1,15 @@
+{
+  "canvas": {"w": 128, "h": 128, "bg": "#00000000"},
+  "ops": [
+    {"op": "add_layer", "id": "k", "fill": "gradient", "from": "#2040C0FF", "to": "#F0C020FF", "dir": "h"},
+    {"op": "add_layer", "id": "base", "fill": "gradient", "from": "#FF000000", "to": "#FF0000FF", "dir": "v", "rect": [16, 16, 96, 96]},
+    {"op": "set_opacity", "layer": "base", "value": 0.5},
+    {"op": "add_layer", "id": "c", "fill": "noise", "seed": 5, "alpha": 255},
+    {"op": "set_clip", "layer": "c", "value": true},
+    {"op": "add_layer", "id": "c2", "fill": "gradient", "from": "#FFFF00FF", "to": "#00FFFFFF", "dir": "h"},
+    {"op": "set_clip", "layer": "c2", "value": true},
+    {"op": "set_blend", "layer": "c2", "mode": "over"},
+    {"op": "set_opacity", "layer": "c2", "value": 0.6}
+  ],
+  "out": "png8"
+}
