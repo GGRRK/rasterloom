@@ -177,14 +177,19 @@ void CanvasGLWidget::cleanup() {
     f_ = nullptr;
 }
 
+void CanvasGLWidget::release_context() {
+    makeCurrent();
+    cleanup();
+    doneCurrent();
+}
+
 void CanvasGLWidget::initializeGL() {
     initialized_ = true;
     // Reparenting destroys the context; re-upload everything when it comes back.
-    connect(context(), &QOpenGLContext::aboutToBeDestroyed, this, [this] {
-        makeCurrent();
-        cleanup();
-        doneCurrent();
-    }, Qt::UniqueConnection);
+    // A member function, not a lambda: Qt rejects Qt::UniqueConnection for functors and would
+    // silently skip the connection.
+    connect(context(), &QOpenGLContext::aboutToBeDestroyed, this, &CanvasGLWidget::release_context,
+            Qt::UniqueConnection);
     init_resources(context());
 }
 

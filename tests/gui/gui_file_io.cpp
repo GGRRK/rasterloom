@@ -183,7 +183,10 @@ private slots:
 
     void drag_and_drop_and_recent() {
         const QString target = path(QStringLiteral("doc.orp"));
+        // Dropping a file on an open document places it as a new layer (Photoshop); the document
+        // itself does not change (tests/gui/gui_import.cpp covers the rest of drag-and-drop).
         w_->new_document(50, 40, 0);
+        const size_t layers_before = s()->doc().root().children.size();
         QMimeData md;
         md.setUrls({QUrl::fromLocalFile(target)});
         QDragEnterEvent enter(QPoint(10, 10), Qt::CopyAction, &md, Qt::LeftButton, Qt::NoModifier);
@@ -192,15 +195,13 @@ private slots:
         QDropEvent drop(QPointF(10, 10), Qt::CopyAction, &md, Qt::LeftButton, Qt::NoModifier);
         QCoreApplication::sendEvent(w_.get(), &drop);
         QVERIFY(drop.isAccepted());
-        QTRY_COMPARE(s()->file_path(), target);
+        QTRY_COMPARE(s()->doc().root().children.size(), layers_before + 1);
+        QCOMPARE(QString::fromStdString(s()->doc().root().children.back().name), QStringLiteral("doc"));
+        QVERIFY(s()->file_path().isEmpty());
+        QCOMPARE(s()->doc().width(), 50);
+        // Open adds to the recent files: most recent first, absolute paths.
+        QVERIFY(w_->open_file(target));
         QCOMPARE(s()->doc().width(), 160);
-        // Unsupported files are refused at drag-enter.
-        QMimeData bad;
-        bad.setUrls({QUrl::fromLocalFile(path(QStringLiteral("notes.txt")))});
-        QDragEnterEvent enter2(QPoint(10, 10), Qt::CopyAction, &bad, Qt::LeftButton, Qt::NoModifier);
-        QCoreApplication::sendEvent(w_.get(), &enter2);
-        QVERIFY(!enter2.isAccepted());
-        // Recent files: most recent first, absolute paths.
         QSettings st(QStringLiteral("Rasterloom"), QStringLiteral("Rasterloom"));
         const QStringList recent = st.value(QStringLiteral("recent")).toStringList();
         QVERIFY(!recent.isEmpty());

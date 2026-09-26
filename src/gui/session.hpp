@@ -45,6 +45,16 @@ public:
     void new_document(int w, int h, int background, rl::Rgba8 bg_color = {255, 255, 255, 255});
     // Takes over a document built by a file loader. Its history is cleared.
     void adopt_document(std::unique_ptr<rl::Document> doc, const QString& path, const QString& base_label);
+    // A new w x h document (transparent canvas background) whose content is made by one creation op
+    // (Paste with no document: a place_image); the op becomes part of the base script, so the
+    // session exports as a render script. `active` is the layer the op creates.
+    OpResult new_document_from_op(int w, int h, const Json& op, const std::string& active, const QString& base_label);
+
+    // The start-up document is a stand-in for "no document open" (Photoshop starts empty): while
+    // nobody has touched it, dropping or pasting an image opens that image as its own document
+    // instead of placing it into the blank canvas.
+    void mark_placeholder() { placeholder_ = true; }
+    bool is_placeholder() const { return placeholder_ && doc_ && entries_.empty() && !modified_ && path_.isEmpty(); }
 
     bool has_document() const { return doc_ != nullptr; }
     rl::Document& doc() { return *doc_; }
@@ -135,6 +145,7 @@ private:
     std::function<void()> guard_;
     Json last_op_;
     bool in_guard_ = false;
+    bool placeholder_ = false;
 };
 
 }  // namespace rl::gui

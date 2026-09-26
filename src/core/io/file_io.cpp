@@ -215,6 +215,8 @@ std::vector<std::string> save_document(const DocState& s, const std::string& pat
     return warnings;
 }
 
+DocState single_layer_document(const RgbaBuffer& img, const std::string& name) { return single_layer_doc(img, name); }
+
 std::string dump_tree_json(const DocState& s) {
     using nlohmann::json;
     json c = json::array();

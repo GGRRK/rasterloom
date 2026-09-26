@@ -62,6 +62,15 @@
   </requires>
   <content_rating type="oars-1.1"/>
   <releases>
+    <release version="0.1.1" date="2026-09-26" type="development">
+      <description>
+        <p>
+          Fixes the blank canvas on real graphics cards, and brings images in the way you expect:
+          drop images onto a document as new layers, Cut, Copy, Copy Merged, Paste and Paste in
+          Place with the system clipboard, File &gt; Place, and GIF, WebP, BMP, TGA and ICO input.
+        </p>
+      </description>
+    </release>
     <release version="0.1.0" date="2026-09-26" type="development">
       <description>
         <p>

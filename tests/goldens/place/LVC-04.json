@@ -1,0 +1,12 @@
+{
+  "canvas": {"w": 64, "h": 64, "bg": "#00000000"},
+  "ops": [
+    {"op": "add_layer", "id": "k", "fill": "gradient", "from": "#2040C0FF", "to": "#F0C020FF", "dir": "h"},
+    {"op": "add_layer", "id": "u", "fill": "gradient", "from": "#E0302000", "to": "#E03020FF", "dir": "v", "rect": [8, 8, 48, 48]},
+    {"op": "select_rect", "x": 12.0, "y": 16.0, "w": 30.0, "h": 24.0},
+    {"op": "feather", "radius": 3.0},
+    {"op": "layer_via_copy", "id": "c", "layer": "u", "cut": true},
+    {"op": "set_visible", "layer": "u", "value": false}
+  ],
+  "out": "png8"
+}

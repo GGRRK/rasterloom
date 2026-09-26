@@ -18,6 +18,7 @@ Exit 0 ok, 1 on any unclassified library, unresolved version or missing license 
 from __future__ import annotations
 
 import argparse
+import json
 import re
 import shutil
 import subprocess
@@ -227,6 +228,37 @@ def main(argv=None) -> int:
             lic_files = [combined]
         entry["license_files"] = [str(p) for p in lic_files]
         manifest.append(entry)
+    # 4. third-party code compiled into a bundled Qt plugin (static copies in the aqtinstall Qt)
+    qt_prefix = Path((run([args.qmake, "-query", "QT_INSTALL_PREFIX"]) or "").strip())
+    for c in spec.get("inside_qt_plugins", []):
+        hits = [p for p in plugins if re.fullmatch(c["plugin"], p)]
+        if not hits:
+            continue
+        # A distribution Qt links the shared library (listed above); the aqtinstall Qt compiles its own
+        # copy in. Decide by the plugin's own DT_NEEDED entries, not by whether a library of that name
+        # is bundled for some other reason (libtiff pulls in the system libwebp, for example).
+        dyn = run(["readelf", "-d", str(args.appdir / "usr/plugins" / hits[0])]) or ""
+        needed = re.findall(r"\(NEEDED\)\s+Shared library: \[([^\]]+)\]", dyn)
+        if any(re.fullmatch(c["unless_bundled"], n) for n in needed):
+            continue
+        version = None
+        for sb in sorted((qt_prefix / "sbom").glob(f"{c['sbom_module']}-*.spdx.json")):
+            try:
+                doc = json.loads(sb.read_text())
+            except (OSError, ValueError):
+                continue
+            for pk in doc.get("packages", []):
+                if pk.get("name") == c["sbom_package"] and pk.get("versionInfo"):
+                    version = pk["versionInfo"]
+        lic = REPO / c["license_file"]
+        if version is None:
+            problems.append(f"{c['name']}: no version in {qt_prefix}/sbom ({c['sbom_package']})")
+        if not lic.is_file():
+            problems.append(f"{c['name']}: license text {lic} missing")
+        manifest.append({"name": c["name"], "spdx": c["spdx"], "url": c["url"],
+                         "used_for": c["used_for"],
+                         "version": f"{version} (compiled into the Qt {qt_version} binaries' plugin)" if version else None,
+                         "license_files": [str(lic)]})
     for c in spec.get("compiled_in", []):
         manifest.append(dict(c, used_for=c["used_for"]))
 

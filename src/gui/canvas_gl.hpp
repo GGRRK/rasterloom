@@ -66,6 +66,7 @@ private:
         quint64 gen = 0;
     };
     void cleanup();
+    void release_context();
     bool init_resources(QOpenGLContext* ctx);
     void render_gl(int width, int height, qreal dpr);
     void release_all_slots();

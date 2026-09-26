@@ -63,6 +63,9 @@ constexpr Info kTable[kCount] = {
     /* 40 */ {"60-editing-ops", "duplicate_layer without parent inserts the copy at the top of the container, not at i + 1"},
     /* 41 */ {"60-editing-ops", "set_adjustment merges params into the previous params instead of replacing them"},
     /* 42 */ {"40-brush", "pre-2026-09-26 flow model: mask-shaped ceiling (Wash T = O * m, Build-up m) instead of mask-scaled rate"},
+    /* 43 */ {"60-editing-ops", "place_image default centring truncates (W - w) / 2 toward zero instead of floor division"},
+    /* 44 */ {"60-editing-ops", "COPY treats partially selected pixels as fully selected (alpha not scaled by coverage)"},
+    /* 45 */ {"60-editing-ops", "clear ignores the selection and clears the whole layer"},
 };
 
 }  // namespace

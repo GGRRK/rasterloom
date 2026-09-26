@@ -17,6 +17,7 @@ neither `src/` nor `tests/reference/`.
 | `geometry/` | 30 | section 20: SEL-01–24, TR-01–14, RA-01–10, GR-01–04, BK-01–04 | `gen/gen_geometry.py` |
 | `brush/` | 40 | section 9: B01–B27 | `gen/gen_brush.py` |
 | `editing/` | 60 | section 10: DEL, NAME, DUP, ADJ, GM, SAL, HIST (+ `*R` equal_to targets); staged in `.pending-editing/` until the doc-60 ops are implemented, then `gen_editing.py --activate` | `gen/gen_editing.py` |
+| `place/` | 60 §14 | section 14.8: PL (place_image, payload decoding), LVC (layer_via_copy, cut, merged), CLR (clear), `*R` equal_to targets, FIX-K, and one `err_*` per §14 rule | `gen/gen_place.py` |
 | `gen/` | — | generators and `check_scripts_203040.py` (static op/field checker for the three suites above) | — |
 | `stats/` | BUILD-SPEC tile engine | tile-allocation goldens: ordinary render scripts whose upper bounds on allocated tiles live in `stats/_expectations.json` (checked through `rasterloom-cli --stats`; the only golden-level catch for mutation 13) | hand-written |
 
@@ -31,6 +32,7 @@ check with:
 cd tests/scripts/gen
 python3 gen_adjust_filters.py && python3 gen_geometry.py && python3 gen_brush.py
 python3 gen_editing.py                 # doc 60; also runs its own structural checker
+python3 gen_place.py                   # doc 60 §14 (place_image, layer_via_copy, clear)
 python3 check_scripts_203040.py        # exit 0 = every valid golden uses only doc-defined ops/fields
 ```
 

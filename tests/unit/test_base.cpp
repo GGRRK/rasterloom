@@ -86,8 +86,8 @@ TEST(Mutation, TableHasFortyDescribedIds) {
 
 TEST(Mutation, ParseList) {
     EXPECT_EQ(mut::parse_list("3"), std::vector<int>({3}));
-    EXPECT_EQ(mut::parse_list("0, 13,42"), std::vector<int>({0, 13, 42}));
-    EXPECT_THROW(mut::parse_list("43"), std::invalid_argument);
+    EXPECT_EQ(mut::parse_list("0, 13,45"), std::vector<int>({0, 13, 45}));
+    EXPECT_THROW(mut::parse_list("46"), std::invalid_argument);
     EXPECT_THROW(mut::parse_list("-1"), std::invalid_argument);
     EXPECT_THROW(mut::parse_list("1,,2"), std::invalid_argument);
     EXPECT_THROW(mut::parse_list(""), std::invalid_argument);

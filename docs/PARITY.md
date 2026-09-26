@@ -3,7 +3,7 @@
 
 # Rasterloom vs Photoshop: capability parity
 
-> Tier-0 coverage 96/105. Strict parity 15% of 709 catalogued capabilities. Weighted everyday-workflow coverage 44%. Ceiling is 97% - the remainder is server-side AI, patent-encumbered, proprietary-model or discontinued features that will never be implemented.
+> Tier-0 coverage 99/105. Strict parity 15% of 709 catalogued capabilities. Weighted everyday-workflow coverage 46%. Ceiling is 97% - the remainder is server-side AI, patent-encumbered, proprietary-model or discontinued features that will never be implemented.
 
 _Statuses describe the core engine, proven through render scripts (rasterloom-cli), and the v0.1 Qt GUI. Every functional/parity row is reachable from the GUI's tools, menus or panels; the GUI as a whole is exercised by the gui-smoke test (30 scripted interactions plus every menu action), and rows citing ctest:gui-* are proven there. Tablet pressure is proven only through synthetic events._
 
@@ -19,24 +19,24 @@ Rasterloom is an independent program, not affiliated with Adobe. The catalogue l
 
 ## Evidence run
 
-- Goldens: report generated 2026-09-26T16:16:02+0000, 418 scripts, counts {"ERROR": 0, "FAIL": 0, "PASS": 418, "PENDING": 0}, determinism checked: True.
-- CTest: 298 of 298 tests passed (junit timestamp 2026-09-26T16:19:34).
+- Goldens: report generated 2026-09-26T17:58:55+0000, 475 scripts, counts {"ERROR": 0, "FAIL": 0, "PASS": 475, "PENDING": 0}, determinism checked: True.
+- CTest: 324 of 324 tests passed (junit timestamp 2026-09-26T18:04:53).
 
 ## Totals
 
 | rows | parity | functional | stub | missing | wontfix | tier-0 covered |
 |---:|---:|---:|---:|---:|---:|---:|
-| 709 | 108 | 51 | 0 | 499 | 51 | 96/105 |
+| 709 | 108 | 61 | 1 | 488 | 51 | 99/105 |
 
 ## By area
 
 | area | title | weight | rows | tier-0 | covered | parity | wontfix |
 |---|---|---:|---:|---:|---:|---:|---:|
 | TOOL | Tools panel | 0.07 | 80 | 18 | 18 | 10 | 4 |
-| FILE | File menu and file formats | 0.08 | 56 | 10 | 15 | 0 | 1 |
-| EDIT | Edit menu | 0.07 | 42 | 7 | 10 | 7 | 4 |
+| FILE | File menu and file formats | 0.08 | 56 | 10 | 18 | 0 | 1 |
+| EDIT | Edit menu | 0.07 | 42 | 7 | 16 | 7 | 4 |
 | IMG | Image menu (modes, size, canvas) | 0.05 | 29 | 3 | 8 | 5 | 1 |
-| LAYER | Layers | 0.13 | 47 | 13 | 17 | 9 | 0 |
+| LAYER | Layers | 0.13 | 47 | 13 | 18 | 9 | 0 |
 | MASK | Masks, clipping and channels | 0.07 | 20 | 7 | 8 | 8 | 1 |
 | BLEND | Blend modes and blending options | 0.05 | 37 | 28 | 28 | 28 | 0 |
 | SEL | Selections | 0.1 | 31 | 5 | 11 | 9 | 5 |
@@ -77,7 +77,7 @@ Rasterloom is an independent program, not affiliated with Adobe. The catalogue l
 | TOOL-070 | Zoom tool | functional | ctest:gui-zoom-tool-click-drag |
 | TOOL-073 | Foreground/background color swatches | functional | ctest:gui-smoke |
 | FILE-001 | New document (size, resolution, background contents) | functional | golden:compositing/flatten_partial_bg, ctest:Script.TopLevelShape |
-| FILE-003 | Open | functional | ctest:FileIo.EveryFormatSavesAndOpensByExtensionAndContent |
+| FILE-003 | Open | functional | ctest:FileIo.EveryFormatSavesAndOpensByExtensionAndContent, ctest:gui-open-gif-bmp-webp, ctest:gui-drop-opens-when-no-document |
 | FILE-007 | Save | functional | ctest:FileIo.*, ctest:AtomicSave.*, ctest:Ora.OrpRoundTripsTheWholeModelLosslessly |
 | FILE-008 | Save As | functional | ctest:FileIo.*, ctest:AtomicSave.* |
 | FILE-027 | Photoshop PSD: read | functional | ctest:Psd.*, ctest:psd_ora_roundtrip_corpus |
@@ -88,9 +88,9 @@ Rasterloom is an independent program, not affiliated with Adobe. The catalogue l
 | FILE-033 | JPEG: write (quality, baseline/progressive) | functional | ctest:Raster.TiffRgbaIsExactAndJpegIsDeterministic, ctest:FileIo.EveryFormatSavesAndOpensByExtensionAndContent |
 | EDIT-001 | Undo | functional | ctest:History.UndoOpRestoresPixelsAndStructure, ctest:gui-session, ctest:gui-smoke |
 | EDIT-002 | Redo | functional | ctest:gui-session, ctest:gui-smoke |
-| EDIT-004 | Cut | missing |  |
-| EDIT-005 | Copy | missing |  |
-| EDIT-007 | Paste | missing |  |
+| EDIT-004 | Cut | functional | ctest:gui-cut-and-clear, golden:place/CLR-*, golden:place/LVC-0[34] |
+| EDIT-005 | Copy | functional | ctest:gui-copy-paste-clipboard, ctest:PlaceOps.CopyThenPasteInPlaceEqualsLayerViaCopy, ctest:PlaceOps.CropTrimsTransparentBordersAndReportsEmpty, golden:place/LVC-01 |
+| EDIT-007 | Paste | functional | golden:place/PL-*, ctest:gui-copy-paste-clipboard, ctest:gui-paste-from-other-application, ctest:gui-paste-new-document |
 | EDIT-011 | Fill selection or layer with a color | parity | golden:geometry/SEL-0[1-9], golden:geometry/BK-01 |
 | EDIT-020 | Free Transform | parity | golden:geometry/TR-*, ctest:gui-smoke |
 | IMG-005 | Mode: RGB Color | functional | golden:compositing/* |
@@ -259,7 +259,7 @@ Source: Photoshop User Guide: Create, open, and import images; Save and export; 
 |---|---|---:|---|---|
 | FILE-001 | New document (size, resolution, background contents) | 0 | functional | evidence: `golden:compositing/flatten_partial_bg`, `ctest:Script.TopLevelShape` |
 | FILE-002 | New document presets | 1 | missing |  |
-| FILE-003 | Open | 0 | functional | evidence: `ctest:FileIo.EveryFormatSavesAndOpensByExtensionAndContent`; .orp, .ora, PNG, JPEG, TIFF, PSD, PSB |
+| FILE-003 | Open | 0 | functional | evidence: `ctest:FileIo.EveryFormatSavesAndOpensByExtensionAndContent`, `ctest:gui-open-gif-bmp-webp`, `ctest:gui-drop-opens-when-no-document`; .orp, .ora, PNG, JPEG, TIFF, PSD, PSB by the core codecs; GIF (first frame), BMP, WebP, ICO, TGA and any other format Qt's image plugins read, GUI-side (rasterloom-cli opens core formats only); dropping a file with no document open opens it |
 | FILE-004 | Open Recent | 1 | functional | evidence: `ctest:gui-open-recent`; 10 most recent, newest first; files that no longer exist are listed disabled; Clear Recent |
 | FILE-005 | Open as Smart Object | 1 | missing |  |
 | FILE-006 | Close / Close All | 1 | missing |  |
@@ -267,7 +267,7 @@ Source: Photoshop User Guide: Create, open, and import images; Save and export; 
 | FILE-008 | Save As | 0 | functional | evidence: `ctest:FileIo.*`, `ctest:AtomicSave.*`; Save As offers .orp and .ora; flat formats via Export |
 | FILE-009 | Save a Copy | 1 | missing |  |
 | FILE-010 | Revert | 1 | missing |  |
-| FILE-011 | Place Embedded | 2 | missing |  |
+| FILE-011 | Place Embedded | 2 | functional | evidence: `golden:place/PL-*`, `ctest:gui-drop-places-layer`, `ctest:gui-drop-multiple-files`; File > Place and dropping image files on a document add each image as a raster layer named after the file, centred, above the active layer (place_image, doc 60 §14); Photoshop makes a Smart Object and scales large images to fit: here it is pixels at 100 % and content outside the canvas is discarded |
 | FILE-012 | Place Linked | 2 | missing |  |
 | FILE-013 | Export As (format, size, quality) | 1 | missing |  |
 | FILE-014 | Quick Export as PNG | 1 | functional | evidence: `ctest:Png.FileWriteMatchesMemoryEncodeAndDocumentExport`; File > Export > PNG |
@@ -292,9 +292,9 @@ Source: Photoshop User Guide: Create, open, and import images; Save and export; 
 | FILE-033 | JPEG: write (quality, baseline/progressive) | 0 | functional | evidence: `ctest:Raster.TiffRgbaIsExactAndJpegIsDeterministic`, `ctest:FileIo.EveryFormatSavesAndOpensByExtensionAndContent`; 8-bit baseline; flattens the document |
 | FILE-034 | TIFF: read | 1 | functional | evidence: `ctest:Raster.TiffRgbaIsExactAndJpegIsDeterministic`, `ctest:FileIo.EveryFormatSavesAndOpensByExtensionAndContent`; 8-bit RGB(A) |
 | FILE-035 | TIFF: write (layers, compression options) | 1 | functional | evidence: `ctest:Raster.TiffRgbaIsExactAndJpegIsDeterministic`, `ctest:FileIo.EveryFormatSavesAndOpensByExtensionAndContent`; flattened 8-bit RGBA only: no layers, no compression choice |
-| FILE-036 | CompuServe GIF: read/write | 1 | missing |  |
-| FILE-037 | WebP: read/write | 1 | missing |  |
-| FILE-038 | BMP: read/write | 1 | missing |  |
+| FILE-036 | CompuServe GIF: read/write | 1 | stub | read works (first frame, through Qt's GIF plugin; ctest:gui-open-gif-bmp-webp); write is missing (Qt has no GIF writer), so the row counts as missing |
+| FILE-037 | WebP: read/write | 1 | functional | evidence: `ctest:gui-open-gif-bmp-webp`, `ctest:gui-export-webp-bmp`; through Qt's WebP plugin (qtimageformats), GUI only; export is lossless and flattened (no quality/lossy options) |
+| FILE-038 | BMP: read/write | 1 | functional | evidence: `ctest:gui-open-gif-bmp-webp`, `ctest:gui-export-webp-bmp`; through Qt's BMP support, GUI only; export is 24-bit, flattened onto white |
 | FILE-039 | HEIF/HEIC: read/write | 2 | missing |  |
 | FILE-040 | AVIF: read/write | 2 | missing |  |
 | FILE-041 | JPEG 2000: read/write | 2 | missing |  |
@@ -323,13 +323,13 @@ Source: Photoshop User Guide: Undo and history; Fill objects, selections, and la
 | EDIT-001 | Undo | 0 | functional | evidence: `ctest:History.UndoOpRestoresPixelsAndStructure`, `ctest:gui-session`, `ctest:gui-smoke`; one record per gesture; Ctrl+Z in the GUI |
 | EDIT-002 | Redo | 0 | functional | evidence: `ctest:gui-session`, `ctest:gui-smoke`; Ctrl+Shift+Z; redo restores the kept post-state |
 | EDIT-003 | Toggle last state | 1 | missing |  |
-| EDIT-004 | Cut | 0 | missing |  |
-| EDIT-005 | Copy | 0 | missing |  |
-| EDIT-006 | Copy Merged | 1 | missing |  |
-| EDIT-007 | Paste | 0 | missing |  |
-| EDIT-008 | Paste in Place | 1 | missing |  |
+| EDIT-004 | Cut | 0 | functional | evidence: `ctest:gui-cut-and-clear`, `golden:place/CLR-*`, `golden:place/LVC-0[34]`; Ctrl+X: the selected pixels go to the system clipboard and are cleared through the selection (one history record); refused on a transparency-locked layer |
+| EDIT-005 | Copy | 0 | functional | evidence: `ctest:gui-copy-paste-clipboard`, `ctest:PlaceOps.CopyThenPasteInPlaceEqualsLayerViaCopy`, `ctest:PlaceOps.CropTrimsTransparentBordersAndReportsEmpty`, `golden:place/LVC-01`; Ctrl+C to the system clipboard as image/png + image (other applications paste it); soft selection edges copy as partial alpha; transparent borders are trimmed; no selection copies the whole layer |
+| EDIT-006 | Copy Merged | 1 | functional | evidence: `ctest:gui-paste-in-place-copy-merged`, `golden:place/LVC-02`; Shift+Ctrl+C: the visible composite (canvas background included) through the selection |
+| EDIT-007 | Paste | 0 | functional | evidence: `golden:place/PL-*`, `ctest:gui-copy-paste-clipboard`, `ctest:gui-paste-from-other-application`, `ctest:gui-paste-new-document`; Ctrl+V from Rasterloom or any application (browser Copy Image, screenshot tools, copied image files): a new layer above the active one, centred on the selection or the visible canvas; with no document open the image becomes a new document; parts outside the canvas are discarded |
+| EDIT-008 | Paste in Place | 1 | functional | evidence: `ctest:gui-paste-in-place-copy-merged`, `ctest:PlaceOps.CopyThenPasteInPlaceEqualsLayerViaCopy`; Shift+Ctrl+V: at the copied pixels' original position (images from other applications carry none and paste centred) |
 | EDIT-009 | Paste Into / Paste Outside | 1 | missing |  |
-| EDIT-010 | Clear (delete selected pixels) | 1 | missing |  |
+| EDIT-010 | Clear (delete selected pixels) | 1 | functional | evidence: `golden:place/CLR-*`, `ctest:gui-cut-and-clear`; Delete key; needs a selection in the GUI; soft edges fade the pixels; a transparency-locked layer is left alone (Photoshop fills it with the background colour) |
 | EDIT-011 | Fill selection or layer with a color | 0 | parity | evidence: `golden:geometry/SEL-0[1-9]`, `golden:geometry/BK-01` |
 | EDIT-012 | Fill: Content-Aware | 1 | wontfix | wontfix: PatchMatch-based (US patents, barred to 2031/2033 per BUILD-SPEC honest_scope) |
 | EDIT-013 | Fill: Pattern | 1 | missing |  |
@@ -430,7 +430,7 @@ Source: Photoshop User Guide: Create and manage layers; Layers overview; Organiz
 | LAYER-023 | Select multiple layers | 1 | missing |  |
 | LAYER-024 | Align layers | 1 | missing |  |
 | LAYER-025 | Distribute layers | 1 | missing |  |
-| LAYER-026 | Layer via Copy / Layer via Cut | 1 | missing |  |
+| LAYER-026 | Layer via Copy / Layer via Cut | 1 | functional | evidence: `golden:place/LVC-*`, `ctest:gui-layer-via-copy-cut`; Ctrl+J with a selection (without one it duplicates the layer), Shift+Ctrl+J; directly above the source |
 | LAYER-027 | Adjustment layers (non-destructive) | 0 | functional | evidence: `golden:compositing/*adjust*`, `golden:adjust_filters/adj_*`, `ctest:Groups.AdjustmentInsidePassThroughReachesBelowTheGroup`; the eight v0.1 types: Levels, Curves, Brightness/Contrast, Hue/Saturation, Black & White, Invert, Posterize, Threshold |
 | LAYER-028 | Fill layer: Solid Color | 1 | missing |  |
 | LAYER-029 | Fill layer: Gradient | 1 | missing |  |
@@ -906,7 +906,7 @@ Source: Photoshop User Guide: Use grids and measurement guides; Overview of navi
 | VIEW-018 | Transparency checkerboard display | 1 | missing |  |
 | VIEW-019 | Units and rulers preferences | 1 | missing |  |
 | VIEW-020 | Pixel aspect ratio correction | 2 | missing |  |
-| VIEW-021 | GPU-accelerated canvas with software fallback | 1 | functional | evidence: `ctest:gui-gl-canvas`, `ctest:gui-smoke`; OpenGL 3.3 canvas with a QPainter raster fallback (RASTERLOOM_CANVAS=gl\|raster) |
+| VIEW-021 | GPU-accelerated canvas with software fallback | 1 | functional | evidence: `ctest:gui-gl-canvas`, `ctest:gui-gl-widget`, `ctest:gui-canvas-hosting`, `ctest:gui-smoke`; OpenGL 3.3 canvas with a QPainter raster fallback (RASTERLOOM_CANVAS=gl\|raster) |
 | VIEW-022 | 32-bit preview options | 2 | missing |  |
 
 ## WS: Workspace and application

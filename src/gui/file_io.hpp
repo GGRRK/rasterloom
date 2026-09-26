@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 //
 // File open / save / export: a thin Qt adapter over the core's rl::io API (core/io/file_io.hpp).
-// Formats: open PSD/PSB, ORA/.orp, PNG, JPEG, TIFF (the content decides); save .orp (native) and
+// Formats: open PSD/PSB, ORA/.orp, PNG, JPEG, TIFF (the content decides) and, through Qt's image
+// plugins (gui/image_import.hpp), GIF (first frame), BMP, WebP, ICO, TGA and whatever else is installed; save .orp (native) and
 // .ora (the same bytes, for GIMP); export PNG, JPEG (quality), TIFF, PSD/PSB, ORA. Saves are atomic
 // in the core: a failed save leaves the existing file untouched and no temporary file behind.
 // Non-fatal losses come back as warnings, shown together in one dialog.
@@ -20,7 +21,7 @@ struct LoadResult {
     std::unique_ptr<rl::Document> doc;
     QString error;        // empty on success
     QStringList warnings; // import losses (unsupported adjustments, converted 16-bit/CMYK, ...)
-    QString format;       // format key of the content: "png", "jpeg", "tiff", "psd", "ora"
+    QString format;       // format key of the content: "png", "jpeg", "tiff", "psd", "ora", or a Qt reader's ("gif", "webp", ...)
     double ms = 0.0;      // decode time
 };
 
@@ -41,7 +42,7 @@ QString format_of(const QString& path);
 // True for .orp / .ora (lossless, layered: what Save writes).
 bool is_native(const QString& format);
 QString open_filter();
-// Paths the canvas accepts by drag-and-drop / Open (by extension).
+// Paths Open and drag-and-drop accept by extension (core formats + every Qt image reader).
 bool can_open_path(const QString& path);
 
 // Sides above this open, with a warning (editing ops are specified up to it; io reads PSB sizes).

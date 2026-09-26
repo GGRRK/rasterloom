@@ -63,7 +63,7 @@ components:
   - name: Qt (Core, Gui, Widgets, Concurrent, Svg, OpenGLWidgets, WaylandClient)
     spdx: LGPL-3.0-only
     url: https://www.qt.io/
-    used_for: GUI toolkit, dynamically linked as shared libraries (never statically)
+    used_for: GUI toolkit, dynamically linked as shared libraries (never statically); its image-format plugins (qtbase GIF/ICO/JPEG, qtimageformats WebP/TGA/TIFF/WBMP/ICNS) read the formats Open, drag-and-drop and paste accept beyond the core codecs
     version_from: ["pkg-config:Qt6Core", "cmd:qmake6 -query QT_VERSION", "cmd:qmake -query QT_VERSION"]
     license_files: [/usr/share/licenses/qt6-base/LGPL-3.0-only.txt, COPYING.LESSER]
   - name: Qt-Advanced-Docking-System

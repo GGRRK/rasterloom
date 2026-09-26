@@ -7,7 +7,9 @@ and the selection model of `30-geometry-selection.md`. Where this file seems to 
 (lead rulings) applies here too, in particular ruling 4 (every op except `undo` pushes exactly one
 history record) and ruling 5 (strict script shape).
 
-This file defines six ops that the GUI needs from the core and that docs 10–40 do not define:
+This file defines six ops that the GUI needs from the core and that docs 10–40 do not define
+(§14, an addendum of 2026-09-26, adds three more for the clipboard and drag-and-drop:
+`place_image`, `layer_via_copy`, `clear`):
 
 | op | what the user does |
 |---|---|
@@ -556,3 +558,294 @@ built from the path (DUP-03), deleted ids not freed (DEL-07), clip flags release
   sanitising is how file import meets it.
 - **Doc 20 A9** says "Params are fixed at creation in v0.1 (no 'edit adjustment' op)". This doc
   supersedes that sentence with `set_adjustment` (§5).
+
+---
+
+## 14. Addendum 2026-09-26: getting pixels in — `place_image`, `layer_via_copy`, `clear`
+
+Status: normative for v0.1 (import lane). Everything above still holds; this section adds three
+ops that the GUI's clipboard and drag-and-drop are built on (Edit → Cut / Copy / Copy Merged /
+Paste / Paste in Place / Clear, Layer → New → Layer via Copy / Layer via Cut, File → Place, dropping
+image files or image data on a document). As for the six ops above, every one of them pushes
+exactly one history record (50 §0 ruling 4), validates every field before it changes the document
+(§13), and is a script error in every case this section names (C9).
+
+| op | what the user does |
+|---|---|
+| `place_image` | Paste, Paste in Place, File → Place, drop an image file or image data on an open document |
+| `layer_via_copy` | Layer via Copy (Ctrl+J with a selection), Layer via Cut (Shift+Ctrl+J); also the in-document form of Copy / Copy Merged followed by Paste in Place |
+| `clear` | Edit → Clear (Delete); the pixel half of Edit → Cut |
+
+The system clipboard itself is not part of the document or of any script: a render script cannot
+read it. What the GUI puts on the clipboard (the result of §14.4 `COPY`, cropped by §14.4.1) and
+what it pastes are therefore recorded as a `place_image` op that **carries the pixels** in its
+`png` field, so an exported session script replays byte-exactly with no clipboard at all.
+
+### 14.1 The `png` payload: base64
+
+`png` is a JSON string holding the payload bytes in base64 (RFC 4648 §4, the standard alphabet):
+
+1. every character is one of `A–Z a–z 0–9 + /` or `=`; nothing else (no whitespace, no line
+   breaks, no URL-safe `-` / `_`);
+2. the length is a multiple of 4;
+3. `=` appears only as padding: the last group of four is `xx==` or `xxx=`, every other group has
+   no `=`. (Regular expression over the whole string:
+   `^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$`.)
+
+Decoding follows RFC 4648 §4; unused low bits of the last group (in `xx==` and `xxx=`) are
+ignored even when they are not zero. Anything else is a script error.
+
+### 14.2 The `png` payload: the PNG subset
+
+The decoded bytes must be a PNG file (ISO/IEC 15948, W3C PNG 2nd edition) of this exact shape;
+anything else is a script error. Multi-byte integers are big-endian.
+
+1. **Signature**: bytes 0–7 are `89 50 4E 47 0D 0A 1A 0A`.
+2. **Chunks** follow back to back: `length` (4 bytes, at most `2^31 − 1`), `type` (4 bytes, each
+   an ASCII letter `A–Z` or `a–z`), `data` (`length` bytes), `crc` (4 bytes). A chunk that does not
+   fit in the remaining bytes is an error. A chunk is **critical** when the first letter of its type
+   is uppercase, **ancillary** otherwise.
+3. **CRC**: for every critical chunk, `crc` must equal the CRC-32 of `type` followed by `data`
+   (ISO 3309 / ITU-T V.42, the polynomial of PNG Annex D, i.e. zlib's `crc32`). Ancillary chunks
+   (`tEXt`, `gAMA`, `iCCP`, `sRGB`, `pHYs`, …) are skipped entirely: neither their contents nor their
+   CRC are examined, so colour-space and gamma information is **ignored** (bytes are taken as
+   they are stored, like every other 8-bit input in v0.1).
+4. **Order and kinds of critical chunks**: the first chunk is `IHDR`; after it only `PLTE`, `IDAT`
+   and `IEND` may appear as critical chunks (any other critical type is an error), `IHDR` appears
+   once, `PLTE` at most once and only before the first `IDAT` (its contents are ignored; it is a
+   suggested palette for colour type 6), at least one `IDAT` exists, and all `IDAT` chunks are
+   **consecutive** (no other chunk, critical or ancillary, between two `IDAT`s). The first `IEND`
+   ends the file; bytes after it are ignored; reaching the end of the bytes before an `IEND` is an
+   error.
+5. **IHDR** has `length` 13: `width` (4 bytes), `height` (4 bytes), then five bytes that must be
+   exactly: bit depth **8**, colour type **6** (RGBA), compression method 0, filter method 0,
+   interlace method **0** (none). `width` and `height` must be in `1..16384` (C9's size limit).
+   Every other bit depth, colour type (grey, RGB, palette, grey+alpha) or Adam7 interlacing is an
+   error: the GUI always re-encodes what it pastes or places into this shape.
+6. **Image data**: the `data` of all `IDAT` chunks, concatenated in order, is one zlib stream
+   (RFC 1950 / RFC 1951) that must decompress completely (end-of-stream reached, Adler-32 correct)
+   to **exactly** `height * (1 + 4 * width)` bytes: one filter-type byte followed by `4 * width`
+   filtered bytes per row. Fewer or more bytes is an error. Bytes of the `IDAT` data after the end
+   of the zlib stream are ignored.
+7. **Unfiltering** (PNG §9): per row, the filter-type byte `t` must be 0–4 (else an error); with
+   `bpp = 4`, for each byte `k` of the row (0-based), `a` = the reconstructed byte `k − 4` of this
+   row (0 when `k < 4`), `b` = reconstructed byte `k` of the previous row (0 for the first row),
+   `c` = reconstructed byte `k − 4` of the previous row (0 when `k < 4` or on the first row):
+   ```
+   t = 0 (None):    Recon = Filt
+   t = 1 (Sub):     Recon = (Filt + a) mod 256
+   t = 2 (Up):      Recon = (Filt + b) mod 256
+   t = 3 (Average): Recon = (Filt + floor((a + b) / 2)) mod 256
+   t = 4 (Paeth):   Recon = (Filt + paeth(a, b, c)) mod 256
+   paeth(a, b, c): p = a + b - c; pa = |p - a|; pb = |p - b|; pc = |p - c|
+                   return a if pa <= pb and pa <= pc, else b if pb <= pc, else c
+   ```
+   The reconstructed row is `width` pixels of `(R, G, B, A)` bytes, straight alpha: the payload
+   image `P` with `P[j][i]` = pixel `i` of row `j`.
+
+### 14.3 `place_image`
+
+**Semantics.** Adds a new raster layer holding the payload image, placed with its top-left pixel
+at canvas pixel `(x, y)`.
+
+```
+(w, h, P) = the payload (§14.1, §14.2)
+if "x" is absent:  x = floor_div(W - w, 2);  y = floor_div(H - h, 2)     # centred on the canvas
+new raster layer L: default properties (doc 10 §1: visible, opacity 1, fill 1, norm, Dissolve
+                    seed 0, no clip, clbl, no lock, no mask), L.name = name (default "")
+for every canvas pixel (cx, cy):
+    i = cx - x;  j = cy - y
+    L(cx, cy) = canonical(P[j][i])   if 0 <= i < w and 0 <= j < h
+                (0, 0, 0, 0)          otherwise
+insert L (§14.3.1)
+```
+
+`floor_div(n, 2)` is division rounding toward **negative infinity** (Python `n // 2`): an image
+3 px wider than the canvas lands at `x = -2`, not `-1`. `canonical` is C3's rule (alpha byte 0 →
+`(0, 0, 0, 0)`). Parts of the image outside the canvas are discarded (C8a: layers are canvas-sized).
+The selection, `Saved`, `bg` and every other node are unchanged.
+
+#### 14.3.1 Placement (shared by `place_image` and `layer_via_copy`)
+
+- `above: X` (a node id, any kind, not `"root"`): the new layer goes into X's container at index
+  `i + 1`, where `i` is X's index — **directly above X** (Photoshop pastes above the active layer).
+- `parent: P` (`"root"` or a group id): the new layer goes to the **top** of P (doc 10 `add_layer`).
+- Both present is a script error. Neither present: the op's default (`place_image`: top of the root;
+  `layer_via_copy`: §14.5).
+
+**Errors:** `id` missing / not a string / `""` / `"root"` / taken; `png` missing, not a string, or
+not a valid payload (§14.1, §14.2); `x` without `y` or `y` without `x`; `x`, `y` not JSON integers
+or outside `-32768..32768`; `name` not a string or not a valid name (§1.1); `above` unknown or
+`"root"`; `parent` unknown or not a container; `above` and `parent` together; any other field.
+
+### 14.4 `COPY`: the pixels that Copy / Copy Merged take
+
+`COPY(source)` is a canvas-sized RGBA image computed from the document as it is when the op runs:
+
+```
+Src(x, y) = RENDER(root.children, BG)(x, y)     if source is "merged"   # exactly the "png8" output
+                                                                        # (doc 10 §5, §9.4: bg included)
+            L(x, y), the stored pixel           if source is raster layer L
+E(x, y) = effective selection coverage (doc 30 §2: 255 everywhere when there is no selection)
+
+X(x, y) = Src(x, y)                                        if E == 255   # exact short-cuts
+          (0, 0, 0, 0)                                     if E == 0
+          canonical(Src.R, Src.G, Src.B, q((Src.A / 255.0) * (E / 255.0)))   otherwise
+```
+
+For a layer source, `Src` is the layer's **own pixels only**: its mask (enabled or not), visibility,
+opacity, fill, blend mode, clipping and `lock_alpha` are ignored, as for `select_alpha` (§7). A
+partially selected pixel keeps its colour and has its alpha scaled by the coverage, so a feathered
+selection copies with soft edges.
+
+#### 14.4.1 The copied rectangle (what goes on the clipboard)
+
+The clipboard holds `X` cropped to its **content box**: the smallest rectangle
+`[bx, by, bw, bh]` that contains every pixel of `X` whose alpha byte is not 0 (transparent pixels
+around the copied pixels are trimmed, as Photoshop does), plus that rectangle's canvas position
+`(bx, by)`. If every alpha byte of `X` is 0 there is nothing to copy: the GUI reports "the selected
+area is empty" and leaves the clipboard unchanged. Paste in Place is then `place_image` with the
+cropped pixels at `x = bx, y = by`, which gives the same layer pixels as `layer_via_copy` (§14.5)
+would. This crop is used by the GUI and by the core function the GUI calls; no op outputs it
+directly, so it is checked by unit tests rather than goldens (§14.8).
+
+### 14.5 `layer_via_copy`
+
+**Semantics.** Photoshop's Layer via Copy / Layer via Cut, and the in-document equivalent of
+Copy (or Copy Merged) followed by Paste in Place.
+
+```
+source = "merged" if merged else the raster layer named by `layer`
+X = COPY(source)                          # §14.4, from the state before the op
+if every alpha byte of X is 0: script error ("the selected area is empty")
+new raster layer C with pixels X, default properties, C.name = name (default "")
+insert C: §14.3.1; default (no above / parent): directly above `layer` when merged is false,
+          top of the root when merged is true
+if cut: L = CLEAR(L)                      # §14.6, applied to the source layer after C is inserted
+```
+
+`merged` and `cut` are booleans, default `false`. `layer` is required when `merged` is false and
+must be **absent** when `merged` is true; `merged` together with `cut: true` is a script error
+(nothing to cut from a composite). The selection and `Saved` are unchanged (Photoshop keeps the
+selection too).
+
+**Errors:** `id` as `place_image`; `layer` missing (merged false), present (merged true), unknown,
+or not a raster layer (a group, an adjustment layer, `"root"`); `merged` / `cut` not booleans;
+`merged` and `cut` both true; an empty `X`; `name`, `above`, `parent` as `place_image`; any other
+field.
+
+### 14.6 `clear`
+
+**Semantics.** Deletes the selected pixels of a raster layer (Edit → Clear, the Delete key), with
+soft selection edges fading the pixels out. `CLEAR(L)`:
+
+```
+if L.lock_alpha: nothing changes                    # as the eraser (C8a); still one record
+else for every pixel: L(x, y) = coverage_lerp(O = L(x, y), F = (0, 0, 0, 0), M = E(x, y))
+```
+
+`coverage_lerp` is doc 20 §B0.1 exactly as written there (the `M == 0` and `M == 255` short-cuts,
+then the premultiplied mix and the canonical rule), with `F` the transparent pixel and `M` the
+effective selection coverage (doc 30 §2), so with no selection the whole layer is cleared. The
+layer's mask, visibility and opacity are ignored; the selection and `Saved` are unchanged.
+
+**Errors:** `layer` missing, not a string, unknown, `"root"`, or not a raster layer; any other field.
+
+### 14.7 Render-script ops (strict grammar)
+
+| op | fields (type, default, range) | semantics |
+|---|---|---|
+| `place_image` | `id` str, required, new; `png` str, required (§14.1–§14.2); `x`, `y` int `-32768..32768`, optional, both or neither (absent = centred); `name` str, default `""`, a valid name (§1.1); `above` str (node id) **or** `parent` str (container), optional | §14.3 |
+| `layer_via_copy` | `id` str, required, new; `layer` str (raster), required unless `merged`; `merged` bool, default `false`; `cut` bool, default `false`; `name` str, default `""`; `above` **or** `parent`, optional | §14.5 |
+| `clear` | `layer` str, required: a raster layer | §14.6 |
+
+Examples (payload shortened):
+
+```json
+{"op":"place_image","id":"p","png":"iVBORw0KGgoAAAANSUhEUgAA…","name":"photo","above":"Layer 1"}
+{"op":"place_image","id":"p2","png":"iVBORw0KGgo…","x":-12,"y":40}
+{"op":"layer_via_copy","layer":"u","id":"u via copy"}
+{"op":"layer_via_copy","layer":"u","id":"u via cut","cut":true}
+{"op":"layer_via_copy","merged":true,"id":"m","parent":"g"}
+{"op":"clear","layer":"u"}
+```
+
+### 14.8 Golden cases
+
+Location: `tests/scripts/place/`, generator `tests/scripts/gen/gen_place.py` (deterministic; it
+contains its own PNG writer, which uses **every filter type 0–4** in rotation across rows, splits
+`IDAT` into several chunks and inserts ancillary chunks, some with a deliberately wrong CRC, so the
+goldens exercise the whole of §14.2). Fixture **K** is §10's (64×64, `k` gradient).
+
+| id | setup | what it catches |
+|---|---|---|
+| PL-01 | K + `place_image` of a 20×12 image (every alpha 0..255 band, alpha-0 pixels with non-zero colour), default placement | decoding (all five filters, split `IDAT`, skipped ancillary chunks), centring `(22, 26)`, canonicalisation |
+| PL-02 | K + the same image at `x = -5, y = 50` | clipping at the canvas edge, negative offsets |
+| PL-03 | K + a 67×69 image, default placement | **mutation 43**: `floor_div(-3, 2) = -2`, `floor_div(-5, 2) = -3` (truncation gives -1, -2) |
+| PL-04 | K + `u` solid + `t` solid `mul`; `place_image … above u` | placement directly above, under the Multiply layer |
+| PL-05 | K + isolated `scrn` group `g` ⊃ `c`; `place_image … parent g` | top of a group, inside its isolation |
+| PL-06 | K + a 32×16 opaque solid payload at `(8, 8)` (equal_to PL-06R: K + `add_layer` solid rect `[8, 8, 32, 16]`) | the payload's bytes arrive unchanged |
+| PL-07 | K + place; `set_opacity` of the new id 0.5; `set_blend … diff` | the new node is an ordinary raster layer |
+| PL-08 | K + place; `undo` (equal_to FIX-K) | one history record |
+| PL-09 | K + a payload with a `PLTE`, a zero-length first `IDAT`, and chunks after `IEND` | the permitted §14.2 variations are accepted |
+| LVC-01 | K + `u` noise (random alpha); `select_ellipse` anti-aliased; `layer_via_copy u` as `c`; hide `u` | **mutation 44**: alpha scaled by partial coverage |
+| LVC-02 | bg `#336699FF`; gradient `k` over the left 40 px only, `u` `mul`, invert `a` (fill 0.3); `select_rect` across `k` and bare background; `layer_via_copy merged` as `m`; hide `k`, `u`, `a` | merged = the png8 composite **including the background**, copied through the selection |
+| LVC-03 | K + `u` alpha-ramp rect; feathered rect selection; `layer_via_copy u cut` as `c`; hide `c` | cut: the source is cleared by §14.6 |
+| LVC-04 | LVC-03's ops, then hide `u` instead | cut: the copy holds the selected pixels |
+| LVC-05 | K + `u` solid + `t` `mul`; rect selection; `layer_via_copy u` as `c`; `set_blend c diff` | default placement directly above the source |
+| LVC-06 | K + `u` noise; no selection; `layer_via_copy u` as `c`; `delete_layer u` (equal_to LVC-06R: K + `u`) | no selection copies every byte unchanged |
+| LVC-07 | K + `u` with a mask, opacity 0.3, hidden; `select_rect`; `layer_via_copy u` as `c` | mask, opacity and visibility of the source ignored |
+| LVC-08 | LVC-03's setup; `layer_via_copy u cut`; `undo` (equal_to LVC-08R: the setup alone) | copy + cut is one record |
+| CLR-01 | K + `u` noise; anti-aliased ellipse; `clear u` | **mutation 45**: coverage honoured (partial alpha) |
+| CLR-02 | K + `u` noise; `clear u` with no selection (equal_to FIX-K) | no selection clears everything |
+| CLR-03 | K + `u` noise; `lock_transparency u`; `select_rect`; `clear u` (equal_to CLR-03R: without the `clear`) | a locked layer is left alone |
+| CLR-04 | K + `u` gradient; feathered rect; `clear u`; `undo`; `select_ellipse`; `clear u` | one record; a second clear with another selection |
+
+Error scripts (`"expect": "error"`), each breaking exactly one rule: base64 with a space, a `-`,
+bad length, misplaced `=`; bytes that are not a PNG; colour type 2; bit depth 16; Adam7; a wrong
+`IDAT` CRC; no `IEND`; an unknown critical chunk; non-consecutive `IDAT`s; `PLTE` after `IDAT`;
+decompressed data one byte short and one byte long; filter type 5; width 16385; `x` without `y`;
+`x` out of range; `above` with `parent`; `above: "root"`; an id that is taken; a name with a control
+character; `layer_via_copy` of a group, of an adjustment layer, with `merged` and `layer`, with
+`merged` and `cut`, without `layer`, of an empty selection area; `clear` of a group and of
+`"root"`.
+
+The Paste / Paste in Place / Copy crop path of §14.4.1 is covered by unit tests
+(`tests/unit/editing/test_place.cpp`: `place_image` of the cropped `COPY` at `(bx, by)` equals
+`layer_via_copy`, for layer and merged sources and soft selections) and by the offscreen GUI test
+`tests/gui/gui_import.cpp` (real `QClipboard` round trips).
+
+### 14.9 Mutation hooks
+
+| id | defect, precisely | caught by |
+|---|---|---|
+| 43 | `place_image`'s default centring uses division truncating toward zero (`(W - w) / 2` in C) instead of `floor_div` | PL-03 |
+| 44 | `COPY` treats every partially selected pixel as fully selected (`X = Src` whenever `E > 0`) | LVC-01, LVC-04 |
+| 45 | `clear` ignores the selection and clears the whole layer | CLR-01, CLR-04, LVC-03 |
+
+### 14.10 Parity notes (feed `docs/PARITY.md`)
+
+1. **Pasted and placed images become raster layers.** Photoshop's Place Embedded (and dropping a
+   file on a document) creates a Smart Object and, with the default "Resize Image During Place",
+   scales an image larger than the canvas down to fit. Rasterloom places at 100 % as a plain raster
+   layer (resize afterwards with Free Transform). **Divergence.**
+2. **Content outside the canvas is discarded** when an image larger than the canvas is pasted or
+   placed (C8a: canvas-sized layers). Photoshop keeps it in the layer. **Divergence.**
+3. **Copy trims transparent borders** (§14.4.1) and copies soft selection edges as partial alpha:
+   this matches Photoshop's documented behaviour as far as the public User Guide describes it; the
+   exact alpha arithmetic of partially selected pixels is not published. **Unknown** in the last
+   bit.
+4. **Copy with no selection** copies the whole layer (as after Select All) and **Clear needs a
+   selection in the GUI** (the op itself clears everything). Photoshop's menu state without a
+   selection was not checked. **Unknown.**
+5. **Clear on a transparency-locked layer** does nothing here; Photoshop fills the selection with
+   the background colour. **Divergence.**
+6. **Paste position**: centred on the active selection's bounds if there is one, else on the
+   visible part of the canvas; Paste in Place uses the copied pixels' original position (for
+   images copied in other applications, which carry no position, it behaves as Paste). The
+   selection-centred rule is Photoshop's behaviour as commonly described; not verified against
+   Photoshop. **Unknown.**
+7. **Colour management**: gamma, `sRGB`, `iCCP` and other colour information in pasted or placed
+   images is ignored (bytes are used as stored), as everywhere in v0.1. **Divergence.**
+8. **Copy Merged includes the canvas background** (`bg`, doc 10 §9.4), because it is part of the
+   composite the user sees; Photoshop's Background layer is an ordinary layer and is included too.

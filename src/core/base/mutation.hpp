@@ -12,7 +12,7 @@
 
 namespace rl::mut {
 
-constexpr int kCount = 43;  // ids 0..42
+constexpr int kCount = 46;  // ids 0..45
 
 namespace detail {
 extern bool g_active[kCount];

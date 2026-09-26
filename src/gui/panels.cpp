@@ -16,6 +16,7 @@
 #include <QVBoxLayout>
 
 #include <cmath>
+#include <string>
 
 #include "core/composite/render.hpp"
 #include "gui/canvas.hpp"
@@ -64,7 +65,15 @@ void HistoryPanel::rebuild() {
     const auto& e = s_->entries();
     for (size_t i = 0; i < e.size(); ++i) {
         auto* it = new QListWidgetItem(icon(QStringLiteral("history")), e[i].label);
-        it->setToolTip(QString::fromStdString(e[i].op.dump()).left(600));
+        // A place_image op carries its pixels (megabytes of base64): show their size, not the text.
+        const auto png = e[i].op.find("png");
+        if (png != e[i].op.end() && png->is_string()) {
+            Json shown = e[i].op;
+            shown["png"] = "<" + std::to_string(png->get_ref<const std::string&>().size()) + " characters of base64 PNG>";
+            it->setToolTip(QString::fromStdString(shown.dump()).left(600));
+        } else {
+            it->setToolTip(QString::fromStdString(e[i].op.dump()).left(600));
+        }
         if (i >= s_->applied_count()) {
             it->setForeground(QColor(0x6a, 0x6e, 0x75));
             QFont f = it->font();

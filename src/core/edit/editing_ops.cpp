@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 //
 // Render-script ops owned by docs/math/60-editing-ops.md: delete_layer, set_name, duplicate_layer,
-// set_adjustment, set_group_mode, select_alpha.
+// set_adjustment, set_group_mode, select_alpha; the §14 addendum ops live in place.cpp.
 //
 // Every handler reads and validates all of its fields, every id and every derived id BEFORE it
 // changes the document (doc 60 §13), so a script error leaves the state untouched. The engine
@@ -17,6 +17,7 @@
 #include "core/base/error.hpp"
 #include "core/base/mutation.hpp"
 #include "core/edit/names.hpp"
+#include "core/edit/place.hpp"
 #include "core/geometry/dense.hpp"
 #include "core/script/domains.hpp"
 #include "core/select/selection_ops.hpp"
@@ -186,6 +187,7 @@ void registerEditingOps(OpRegistry& r) {
     r.add("set_adjustment", op_set_adjustment);
     r.add("set_group_mode", op_set_group_mode);
     r.add("select_alpha", op_select_alpha);
+    edit::register_place_ops(r);  // §14 addendum: place_image, layer_via_copy, clear
 }
 
 }  // namespace rl::script

@@ -2,7 +2,7 @@
 """mutation_gate.py - prove the golden suite is not vacuous: every injected core defect must turn
 at least one golden red.
 
-    mutation_gate.py --cli PATH [--ids 0-42] [--ref tests/reference/refcomp.py]
+    mutation_gate.py --cli PATH [--ids 0-45] [--ref tests/reference/refcomp.py]
                      [--scripts tests/scripts] [--out tests/output] [--filter GLOB ...]
                      [--jobs K] [--no-baseline] [--allow-pending] [--timeout SEC]
 
@@ -58,7 +58,7 @@ def main(argv: list[str] | None = None) -> int:
                                  formatter_class=argparse.RawDescriptionHelpFormatter,
                                  epilog=__doc__.split("\n", 1)[1])
     ap.add_argument("--cli", required=True)
-    ap.add_argument("--ids", default="0-42", help="e.g. 0-42 or 0-6,14,16-23")
+    ap.add_argument("--ids", default="0-45", help="e.g. 0-45 or 0-6,14,16-23")
     ap.add_argument("--ref", default=str(rg.REPO / "tests/reference/refcomp.py"))
     ap.add_argument("--scripts", default=str(rg.REPO / "tests/scripts"))
     ap.add_argument("--out", default=str(rg.REPO / "tests/output"))

@@ -1,0 +1,13 @@
+{
+  "canvas": {"w": 64, "h": 64, "bg": "#00000000"},
+  "ops": [
+    {"op": "add_layer", "id": "k", "fill": "gradient", "from": "#2040C0FF", "to": "#F0C020FF", "dir": "h"},
+    {"op": "add_layer", "id": "u", "fill": "noise", "seed": 5, "alpha": "random"},
+    {"op": "add_mask", "layer": "u", "fill": "gradient", "from": 0, "to": 255},
+    {"op": "set_opacity", "layer": "u", "value": 0.3},
+    {"op": "set_visible", "layer": "u", "value": false},
+    {"op": "select_rect", "x": 10.0, "y": 10.0, "w": 30.0, "h": 20.0},
+    {"op": "layer_via_copy", "id": "c", "layer": "u", "name": "copy"}
+  ],
+  "out": "png8"
+}

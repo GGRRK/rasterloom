@@ -13,7 +13,9 @@
 #include <QTimer>
 
 #include <functional>
+#include <optional>
 
+#include "core/io/png.hpp"
 #include "gui/file_io.hpp"
 #include "gui/op_runner.hpp"
 #include "gui/tools.hpp"
@@ -80,6 +82,13 @@ public slots:
     void new_document(int w, int h, int background);
     bool open_file(const QString& path);
     void show_message(const QString& text, bool warning);
+    // Getting images in (gui/main_window_import.cpp): clipboard, File > Place, drag-and-drop.
+    void copy_selection(bool merged, bool cut);
+    void paste(bool in_place);
+    void clear_selected();
+    void layer_via(bool cut);
+    bool place_file(const QString& path);
+    void handle_drop(const QStringList& files, const QStringList& remote, const std::optional<rl::io::RgbaBuffer>& data);
 
 protected:
     void closeEvent(QCloseEvent* e) override;
@@ -149,6 +158,12 @@ private:
     void update_title();
     void update_color_under_cursor();
     void update_actions();
+    void place_dialog();
+    // Adds `img` as a new layer (place_image) above the active layer at `at` (canvas centre when
+    // absent), or, while the start-up document is untouched, opens it as a new document.
+    bool place_pixels(const rl::io::RgbaBuffer& img, const QString& name, std::optional<QPoint> at, const QString& label);
+    QPoint paste_position(int w, int h) const;  // centred on the selection, else on the visible canvas
+    Json placement_fields() const;              // {"above": active} or {"parent": active group}
 
     EditorSession* session_ = nullptr;
     ToolState* tools_ = nullptr;
@@ -179,6 +194,7 @@ private:
     QLabel* color_label_ = nullptr;
     QLabel* color_swatch_ = nullptr;
     QTimer color_timer_;
+    QTimer* msg_timer_ = nullptr;  // clears the status message
     QPointF cursor_c_;
     bool cursor_inside_ = false;
     QPointer<InputDiagnosticsDialog> diag_dialog_;

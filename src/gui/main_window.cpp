@@ -18,6 +18,7 @@
 #include <QDir>
 #include <QDialogButtonBox>
 #include <QFileInfo>
+#include <QImageWriter>
 #include <QFontMetrics>
 #include <QInputDialog>
 #include <QLabel>
@@ -50,6 +51,7 @@
 #include "gui/dialogs.hpp"
 #include "gui/file_io.hpp"
 #include "gui/icons.hpp"
+#include "gui/image_import.hpp"
 #include "gui/json_util.hpp"
 #include "gui/layers_panel.hpp"
 #include "gui/panels.hpp"
@@ -171,6 +173,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent) {
     }
     set_tool(Tool::Brush);
     new_document(1600, 1000, 0);
+    session_->mark_placeholder();  // "no document open" until the user touches it
 }
 
 MainWindow::~MainWindow() = default;
@@ -198,7 +201,7 @@ void MainWindow::build_docks() {
                 auto* raster = new CanvasRasterWidget(canvas_);
                 canvas_->set_widget(raster);
                 QWidget* old = cw->takeWidget();
-                cw->setWidget(raster);
+                cw->setWidget(raster, ads::CDockWidget::ForceNoScrollArea);
                 canvas_widget_ = raster;
                 if (old) old->deleteLater();
                 if (backend_label_) backend_label_->setText(QStringLiteral("raster"));
@@ -208,7 +211,9 @@ void MainWindow::build_docks() {
     }
     auto* canvas_dock = new ads::CDockWidget(dock_, tr("Canvas"));
     canvas_dock->setObjectName(QStringLiteral("CanvasDock"));
-    canvas_dock->setWidget(canvas_widget_);
+    // No QScrollArea around the canvas: QScrollArea::setWidget() turns autoFillBackground on, and on
+    // a QOpenGLWidget that makes every QPainter::begin() clear the frame the GL pass just drew.
+    canvas_dock->setWidget(canvas_widget_, ads::CDockWidget::ForceNoScrollArea);
     canvas_dock->setFeature(ads::CDockWidget::NoTab, true);
     canvas_dock->setFeature(ads::CDockWidget::DockWidgetClosable, false);
     canvas_dock->setFeature(ads::CDockWidget::DockWidgetFloatable, false);
@@ -345,6 +350,7 @@ void MainWindow::build_menus() {
     recent_menu_ = file->addMenu(tr("Open &Recent"));
     recent_menu_->setObjectName(QStringLiteral("RecentMenu"));
     connect(recent_menu_, &QMenu::aboutToShow, this, &MainWindow::rebuild_recent_menu);
+    add_op_action(file, QStringLiteral("place"), tr("&Place..."), {}, "place_image", [this] { place_dialog(); });
     file->addSeparator();
     add_action(file, QStringLiteral("save"), tr("&Save"), QKeySequence::Save, [this] { save(); }, QStringLiteral("save"));
     add_action(file, QStringLiteral("save_as"), tr("Save &As..."), QKeySequence::SaveAs, [this] { save_as(); });
@@ -354,6 +360,9 @@ void MainWindow::build_menus() {
     add_action(exp, QStringLiteral("export_tiff"), tr("TIFF..."), {}, [this] { export_as(QStringLiteral("tiff")); });
     add_action(exp, QStringLiteral("export_psd"), tr("PSD / PSB..."), {}, [this] { export_as(QStringLiteral("psd")); });
     add_action(exp, QStringLiteral("export_ora"), tr("OpenRaster (.ora)..."), {}, [this] { export_as(QStringLiteral("ora")); });
+    if (QImageWriter::supportedImageFormats().contains("webp"))
+        add_action(exp, QStringLiteral("export_webp"), tr("WebP (lossless)..."), {}, [this] { export_as(QStringLiteral("webp")); });
+    add_action(exp, QStringLiteral("export_bmp"), tr("BMP..."), {}, [this] { export_as(QStringLiteral("bmp")); });
     exp->addSeparator();
     add_action(exp, QStringLiteral("export_script"), tr("Session as Render Script..."), {}, [this] { export_session_script(); });
     file->addSeparator();
@@ -365,6 +374,14 @@ void MainWindow::build_menus() {
     QAction* redo = add_action(edit, QStringLiteral("redo"), tr("&Redo"), QKeySequence(tr("Ctrl+Shift+Z")), [this] { session_->redo(); },
                                QStringLiteral("redo"));
     redo->setShortcuts({QKeySequence(tr("Ctrl+Shift+Z")), QKeySequence(tr("Ctrl+Y"))});
+    edit->addSeparator();
+    add_op_action(edit, QStringLiteral("cut"), tr("Cu&t"), QKeySequence(tr("Ctrl+X")), "clear", [this] { copy_selection(false, true); });
+    add_action(edit, QStringLiteral("copy"), tr("&Copy"), QKeySequence(tr("Ctrl+C")), [this] { copy_selection(false, false); });
+    add_action(edit, QStringLiteral("copy_merged"), tr("Copy &Merged"), QKeySequence(tr("Ctrl+Shift+C")), [this] { copy_selection(true, false); });
+    add_op_action(edit, QStringLiteral("paste"), tr("&Paste"), QKeySequence(tr("Ctrl+V")), "place_image", [this] { paste(false); });
+    add_op_action(edit, QStringLiteral("paste_in_place"), tr("Paste in P&lace"), QKeySequence(tr("Ctrl+Shift+V")), "place_image",
+                  [this] { paste(true); });
+    add_op_action(edit, QStringLiteral("clear"), tr("Cl&ear"), QKeySequence(Qt::Key_Delete), "clear", [this] { clear_selected(); });
     edit->addSeparator();
     add_op_action(edit, QStringLiteral("fill"), tr("&Fill..."), QKeySequence(tr("Shift+F5")), "fill_selection", [this] { fill_dialog(); });
     add_op_action(edit, QStringLiteral("free_transform"), tr("Free &Transform"), QKeySequence(tr("Ctrl+T")), "transform",
@@ -417,6 +434,9 @@ void MainWindow::build_menus() {
     del->setIcon(icon(QStringLiteral("trash")));
     add_op_action(layer, QStringLiteral("duplicate_layer"), tr("D&uplicate Layer"), QKeySequence(tr("Ctrl+J")), "duplicate_layer",
                   [this] { duplicate_layer(); });
+    add_op_action(layer, QStringLiteral("layer_via_copy"), tr("Layer via Cop&y"), {}, "layer_via_copy", [this] { layer_via(false); });
+    add_op_action(layer, QStringLiteral("layer_via_cut"), tr("Layer via Cu&t"), QKeySequence(tr("Ctrl+Shift+J")), "layer_via_copy",
+                  [this] { layer_via(true); });
     add_action(layer, QStringLiteral("rename_layer"), tr("&Rename Layer..."), QKeySequence(tr("F2")), [this] { begin_rename(); });
     // Layer Properties: an adjustment layer's properties are its params (set_adjustment, doc 60 §5);
     // any other layer's editable property here is its name (set_name, §3).
@@ -676,13 +696,14 @@ void MainWindow::show_message(const QString& text, bool warning) {
     last_message_ = text;
     msg_label_->setText(text);
     msg_label_->setStyleSheet(warning ? QStringLiteral("color:#e8a33d;") : QStringLiteral("color:#a4a8b0;"));
-    static QTimer* t = nullptr;
-    if (!t) {
-        t = new QTimer(this);
-        t->setSingleShot(true);
-        connect(t, &QTimer::timeout, this, [this] { msg_label_->clear(); });
+    // Per window: a function-local static outlived the window that parented it, and the next
+    // MainWindow in the process started a deleted timer.
+    if (!msg_timer_) {
+        msg_timer_ = new QTimer(this);
+        msg_timer_->setSingleShot(true);
+        connect(msg_timer_, &QTimer::timeout, this, [this] { msg_label_->clear(); });
     }
-    t->start(warning ? 9000 : 5000);
+    msg_timer_->start(warning ? 9000 : 5000);
 }
 
 bool MainWindow::require_doc() { return session_->has_document(); }
@@ -953,7 +974,8 @@ void MainWindow::export_as(const QString& format) {
     };
     static const Fmt kFmts[] = {{"png", "png", "PNG (*.png)"},        {"jpeg", "jpg", "JPEG (*.jpg *.jpeg)"},
                                 {"tiff", "tif", "TIFF (*.tif *.tiff)"}, {"psd", "psd", "Photoshop (*.psd);;Photoshop Large Document (*.psb)"},
-                                {"ora", "ora", "OpenRaster (*.ora)"}};
+                                {"ora", "ora", "OpenRaster (*.ora)"},  {"webp", "webp", "WebP (*.webp)"},
+                                {"bmp", "bmp", "BMP (*.bmp)"}};
     const Fmt* f = nullptr;
     for (const Fmt& x : kFmts)
         if (format == QLatin1String(x.key)) f = &x;
@@ -1032,25 +1054,30 @@ void MainWindow::rebuild_recent_menu() {
 }
 
 void MainWindow::dragEnterEvent(QDragEnterEvent* e) {
-    if (e->mimeData()->hasUrls())
-        for (const QUrl& u : e->mimeData()->urls())
-            if (u.isLocalFile() && can_open_path(u.toLocalFile())) {
-                e->acceptProposedAction();
-                return;
-            }
-    e->ignore();
+    // Accept every drop that carries files, links or image data: what cannot be used is explained
+    // in the status bar on drop, instead of a silent "no entry" cursor.
+    const QMimeData* md = e->mimeData();
+    bool image_data = md->hasImage();
+    for (const QString& f : md->formats()) image_data = image_data || f.startsWith(QLatin1String("image/"));
+    if (md->hasUrls() || image_data) e->acceptProposedAction();
+    else e->ignore();
 }
 
 void MainWindow::dropEvent(QDropEvent* e) {
-    for (const QUrl& u : e->mimeData()->urls()) {
-        if (!u.isLocalFile() || !can_open_path(u.toLocalFile())) continue;
-        e->acceptProposedAction();
-        // Open after the drop returns (a modal prompt inside a drop handler confuses some compositors).
-        const QString p = u.toLocalFile();
-        QTimer::singleShot(0, this, [this, p] { open_file(p); });
-        return;
+    // Photoshop: files dropped on an open document are placed as layers; with no document the first
+    // opens and the rest are placed into it; image data (from a browser) is placed too.
+    const QMimeData* md = e->mimeData();
+    QStringList files, remote;
+    for (const QUrl& u : md->urls()) {
+        if (u.isLocalFile()) files << u.toLocalFile();
+        else remote << u.toString();
     }
-    e->ignore();
+    std::optional<rl::io::RgbaBuffer> data;
+    if (files.isEmpty())
+        if (const std::optional<ClipboardImage> ci = image_from_mime(md); ci && ci->img.w > 0) data = ci->img;
+    e->acceptProposedAction();
+    // Handle after the drop returns (a modal prompt inside a drop handler confuses some compositors).
+    QTimer::singleShot(0, this, [this, files, remote, data] { handle_drop(files, remote, data); });
 }
 
 // ---- layer actions ---------------------------------------------------------------------------------------------
@@ -1078,6 +1105,11 @@ void MainWindow::delete_layer() {
 void MainWindow::duplicate_layer() {
     if (!require_doc() || !session_->active_node()) return;
     const rl::Node& src = *session_->active_node();
+    // Ctrl+J with a selection on a raster layer is Layer via Copy (Photoshop).
+    if (src.is_raster() && session_->state().selection.active()) {
+        layer_via(false);
+        return;
+    }
     // doc 60 §4.3: the copy's descendants get "<new id>/<their id>"; every derived id must be free.
     std::vector<std::string> sub;
     std::function<void(const rl::Node&)> collect = [&](const rl::Node& n) {

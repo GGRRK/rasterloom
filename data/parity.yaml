@@ -172,7 +172,7 @@ rows:
   # ---- FILE: File menu and file formats (Photoshop User Guide: Create, open, and import images; Save and export; Supported file formats in Photoshop)
   - {id: FILE-001, area: FILE, name: "New document (size, resolution, background contents)", tier: 0, status: functional, evidence: ["golden:compositing/flatten_partial_bg", "ctest:Script.TopLevelShape"]}
   - {id: FILE-002, area: FILE, name: "New document presets", tier: 1, status: missing}
-  - {id: FILE-003, area: FILE, name: "Open", tier: 0, status: functional, evidence: ["ctest:FileIo.EveryFormatSavesAndOpensByExtensionAndContent"], note: ".orp, .ora, PNG, JPEG, TIFF, PSD, PSB"}
+  - {id: FILE-003, area: FILE, name: "Open", tier: 0, status: functional, evidence: ["ctest:FileIo.EveryFormatSavesAndOpensByExtensionAndContent", "ctest:gui-open-gif-bmp-webp", "ctest:gui-drop-opens-when-no-document"], note: ".orp, .ora, PNG, JPEG, TIFF, PSD, PSB by the core codecs; GIF (first frame), BMP, WebP, ICO, TGA and any other format Qt's image plugins read, GUI-side (rasterloom-cli opens core formats only); dropping a file with no document open opens it"}
   - {id: FILE-004, area: FILE, name: "Open Recent", tier: 1, status: functional, evidence: ["ctest:gui-open-recent"], note: "10 most recent, newest first; files that no longer exist are listed disabled; Clear Recent"}
   - {id: FILE-005, area: FILE, name: "Open as Smart Object", tier: 1, status: missing}
   - {id: FILE-006, area: FILE, name: "Close / Close All", tier: 1, status: missing}
@@ -180,7 +180,7 @@ rows:
   - {id: FILE-008, area: FILE, name: "Save As", tier: 0, status: functional, evidence: ["ctest:FileIo.*", "ctest:AtomicSave.*"], note: "Save As offers .orp and .ora; flat formats via Export"}
   - {id: FILE-009, area: FILE, name: "Save a Copy", tier: 1, status: missing}
   - {id: FILE-010, area: FILE, name: "Revert", tier: 1, status: missing}
-  - {id: FILE-011, area: FILE, name: "Place Embedded", tier: 2, status: missing}
+  - {id: FILE-011, area: FILE, name: "Place Embedded", tier: 2, status: functional, evidence: ["golden:place/PL-*", "ctest:gui-drop-places-layer", "ctest:gui-drop-multiple-files"], note: "File > Place and dropping image files on a document add each image as a raster layer named after the file, centred, above the active layer (place_image, doc 60 §14); Photoshop makes a Smart Object and scales large images to fit: here it is pixels at 100 % and content outside the canvas is discarded"}
   - {id: FILE-012, area: FILE, name: "Place Linked", tier: 2, status: missing}
   - {id: FILE-013, area: FILE, name: "Export As (format, size, quality)", tier: 1, status: missing}
   - {id: FILE-014, area: FILE, name: "Quick Export as PNG", tier: 1, status: functional, evidence: ["ctest:Png.FileWriteMatchesMemoryEncodeAndDocumentExport"], note: "File > Export > PNG"}
@@ -205,9 +205,9 @@ rows:
   - {id: FILE-033, area: FILE, name: "JPEG: write (quality, baseline/progressive)", tier: 0, status: functional, evidence: ["ctest:Raster.TiffRgbaIsExactAndJpegIsDeterministic", "ctest:FileIo.EveryFormatSavesAndOpensByExtensionAndContent"], note: "8-bit baseline; flattens the document"}
   - {id: FILE-034, area: FILE, name: "TIFF: read", tier: 1, status: functional, evidence: ["ctest:Raster.TiffRgbaIsExactAndJpegIsDeterministic", "ctest:FileIo.EveryFormatSavesAndOpensByExtensionAndContent"], note: "8-bit RGB(A)"}
   - {id: FILE-035, area: FILE, name: "TIFF: write (layers, compression options)", tier: 1, status: functional, evidence: ["ctest:Raster.TiffRgbaIsExactAndJpegIsDeterministic", "ctest:FileIo.EveryFormatSavesAndOpensByExtensionAndContent"], note: "flattened 8-bit RGBA only: no layers, no compression choice"}
-  - {id: FILE-036, area: FILE, name: "CompuServe GIF: read/write", tier: 1, status: missing}
-  - {id: FILE-037, area: FILE, name: "WebP: read/write", tier: 1, status: missing}
-  - {id: FILE-038, area: FILE, name: "BMP: read/write", tier: 1, status: missing}
+  - {id: FILE-036, area: FILE, name: "CompuServe GIF: read/write", tier: 1, status: stub, note: "read works (first frame, through Qt's GIF plugin; ctest:gui-open-gif-bmp-webp); write is missing (Qt has no GIF writer), so the row counts as missing"}
+  - {id: FILE-037, area: FILE, name: "WebP: read/write", tier: 1, status: functional, evidence: ["ctest:gui-open-gif-bmp-webp", "ctest:gui-export-webp-bmp"], note: "through Qt's WebP plugin (qtimageformats), GUI only; export is lossless and flattened (no quality/lossy options)"}
+  - {id: FILE-038, area: FILE, name: "BMP: read/write", tier: 1, status: functional, evidence: ["ctest:gui-open-gif-bmp-webp", "ctest:gui-export-webp-bmp"], note: "through Qt's BMP support, GUI only; export is 24-bit, flattened onto white"}
   - {id: FILE-039, area: FILE, name: "HEIF/HEIC: read/write", tier: 2, status: missing}
   - {id: FILE-040, area: FILE, name: "AVIF: read/write", tier: 2, status: missing}
   - {id: FILE-041, area: FILE, name: "JPEG 2000: read/write", tier: 2, status: missing}
@@ -231,13 +231,13 @@ rows:
   - {id: EDIT-001, area: EDIT, name: "Undo", tier: 0, status: functional, evidence: ["ctest:History.UndoOpRestoresPixelsAndStructure", "ctest:gui-session", "ctest:gui-smoke"], note: "one record per gesture; Ctrl+Z in the GUI"}
   - {id: EDIT-002, area: EDIT, name: "Redo", tier: 0, status: functional, evidence: ["ctest:gui-session", "ctest:gui-smoke"], note: "Ctrl+Shift+Z; redo restores the kept post-state"}
   - {id: EDIT-003, area: EDIT, name: "Toggle last state", tier: 1, status: missing}
-  - {id: EDIT-004, area: EDIT, name: "Cut", tier: 0, status: missing}
-  - {id: EDIT-005, area: EDIT, name: "Copy", tier: 0, status: missing}
-  - {id: EDIT-006, area: EDIT, name: "Copy Merged", tier: 1, status: missing}
-  - {id: EDIT-007, area: EDIT, name: "Paste", tier: 0, status: missing}
-  - {id: EDIT-008, area: EDIT, name: "Paste in Place", tier: 1, status: missing}
+  - {id: EDIT-004, area: EDIT, name: "Cut", tier: 0, status: functional, evidence: ["ctest:gui-cut-and-clear", "golden:place/CLR-*", "golden:place/LVC-0[34]"], note: "Ctrl+X: the selected pixels go to the system clipboard and are cleared through the selection (one history record); refused on a transparency-locked layer"}
+  - {id: EDIT-005, area: EDIT, name: "Copy", tier: 0, status: functional, evidence: ["ctest:gui-copy-paste-clipboard", "ctest:PlaceOps.CopyThenPasteInPlaceEqualsLayerViaCopy", "ctest:PlaceOps.CropTrimsTransparentBordersAndReportsEmpty", "golden:place/LVC-01"], note: "Ctrl+C to the system clipboard as image/png + image (other applications paste it); soft selection edges copy as partial alpha; transparent borders are trimmed; no selection copies the whole layer"}
+  - {id: EDIT-006, area: EDIT, name: "Copy Merged", tier: 1, status: functional, evidence: ["ctest:gui-paste-in-place-copy-merged", "golden:place/LVC-02"], note: "Shift+Ctrl+C: the visible composite (canvas background included) through the selection"}
+  - {id: EDIT-007, area: EDIT, name: "Paste", tier: 0, status: functional, evidence: ["golden:place/PL-*", "ctest:gui-copy-paste-clipboard", "ctest:gui-paste-from-other-application", "ctest:gui-paste-new-document"], note: "Ctrl+V from Rasterloom or any application (browser Copy Image, screenshot tools, copied image files): a new layer above the active one, centred on the selection or the visible canvas; with no document open the image becomes a new document; parts outside the canvas are discarded"}
+  - {id: EDIT-008, area: EDIT, name: "Paste in Place", tier: 1, status: functional, evidence: ["ctest:gui-paste-in-place-copy-merged", "ctest:PlaceOps.CopyThenPasteInPlaceEqualsLayerViaCopy"], note: "Shift+Ctrl+V: at the copied pixels' original position (images from other applications carry none and paste centred)"}
   - {id: EDIT-009, area: EDIT, name: "Paste Into / Paste Outside", tier: 1, status: missing}
-  - {id: EDIT-010, area: EDIT, name: "Clear (delete selected pixels)", tier: 1, status: missing}
+  - {id: EDIT-010, area: EDIT, name: "Clear (delete selected pixels)", tier: 1, status: functional, evidence: ["golden:place/CLR-*", "ctest:gui-cut-and-clear"], note: "Delete key; needs a selection in the GUI; soft edges fade the pixels; a transparency-locked layer is left alone (Photoshop fills it with the background colour)"}
   - {id: EDIT-011, area: EDIT, name: "Fill selection or layer with a color", tier: 0, status: parity, evidence: ["golden:geometry/SEL-0[1-9]", "golden:geometry/BK-01"]}
   - {id: EDIT-012, area: EDIT, name: "Fill: Content-Aware", tier: 1, status: wontfix, wontfix_reason: "PatchMatch-based (US patents, barred to 2031/2033 per BUILD-SPEC honest_scope)"}
   - {id: EDIT-013, area: EDIT, name: "Fill: Pattern", tier: 1, status: missing}
@@ -328,7 +328,7 @@ rows:
   - {id: LAYER-023, area: LAYER, name: "Select multiple layers", tier: 1, status: missing}
   - {id: LAYER-024, area: LAYER, name: "Align layers", tier: 1, status: missing}
   - {id: LAYER-025, area: LAYER, name: "Distribute layers", tier: 1, status: missing}
-  - {id: LAYER-026, area: LAYER, name: "Layer via Copy / Layer via Cut", tier: 1, status: missing}
+  - {id: LAYER-026, area: LAYER, name: "Layer via Copy / Layer via Cut", tier: 1, status: functional, evidence: ["golden:place/LVC-*", "ctest:gui-layer-via-copy-cut"], note: "Ctrl+J with a selection (without one it duplicates the layer), Shift+Ctrl+J; directly above the source"}
   - {id: LAYER-027, area: LAYER, name: "Adjustment layers (non-destructive)", tier: 0, status: functional, evidence: ["golden:compositing/*adjust*", "golden:adjust_filters/adj_*", "ctest:Groups.AdjustmentInsidePassThroughReachesBelowTheGroup"], note: "the eight v0.1 types: Levels, Curves, Brightness/Contrast, Hue/Saturation, Black & White, Invert, Posterize, Threshold"}
   - {id: LAYER-028, area: LAYER, name: "Fill layer: Solid Color", tier: 1, status: missing}
   - {id: LAYER-029, area: LAYER, name: "Fill layer: Gradient", tier: 1, status: missing}
@@ -749,7 +749,7 @@ rows:
   - {id: VIEW-018, area: VIEW, name: "Transparency checkerboard display", tier: 1, status: missing}
   - {id: VIEW-019, area: VIEW, name: "Units and rulers preferences", tier: 1, status: missing}
   - {id: VIEW-020, area: VIEW, name: "Pixel aspect ratio correction", tier: 2, status: missing}
-  - {id: VIEW-021, area: VIEW, name: "GPU-accelerated canvas with software fallback", tier: 1, status: functional, evidence: ["ctest:gui-gl-canvas", "ctest:gui-smoke"], note: "OpenGL 3.3 canvas with a QPainter raster fallback (RASTERLOOM_CANVAS=gl|raster)"}
+  - {id: VIEW-021, area: VIEW, name: "GPU-accelerated canvas with software fallback", tier: 1, status: functional, evidence: ["ctest:gui-gl-canvas", "ctest:gui-gl-widget", "ctest:gui-canvas-hosting", "ctest:gui-smoke"], note: "OpenGL 3.3 canvas with a QPainter raster fallback (RASTERLOOM_CANVAS=gl|raster)"}
   - {id: VIEW-022, area: VIEW, name: "32-bit preview options", tier: 2, status: missing}
 
   # ---- WS: Workspace and application (Photoshop User Guide: Workspace overview; Settings and preferences; Troubleshoot)

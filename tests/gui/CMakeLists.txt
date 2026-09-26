@@ -40,6 +40,35 @@ set_tests_properties(gui-gl-canvas PROPERTIES
     ENVIRONMENT_MODIFICATION "WAYLAND_DISPLAY=unset:;QT_QPA_PLATFORMTHEME=unset:;QT_SCALE_FACTOR=unset:"
     SKIP_REGULAR_EXPRESSION "SKIP   :")
 
+# The canvas as MainWindow hosts it (regression for 5c8e9df: ADS's QScrollArea turned
+# autoFillBackground on and the GL overlay painter cleared every frame). gui-canvas-hosting is
+# structural and needs no display or GL. gui-gl-widget grabs CanvasGLWidget (paintGL + overlay
+# painter) through offscreen GLX like gui-gl-canvas (DISPLAY kept, nothing mapped) and skips without
+# GL 3.3 core. gui-gl-widget-xcb is the same binary on the xcb platform, which opens a real window:
+# it runs only with RL_TEST_XCB=1 (CI's Xvfb step, headless gamescope) and skips otherwise.
+add_executable(gui_gl_widget "${CMAKE_CURRENT_SOURCE_DIR}/gui_gl_widget.cpp")
+set_target_properties(gui_gl_widget PROPERTIES AUTOMOC ON)
+target_link_libraries(gui_gl_widget PRIVATE rasterloomgui Qt6::Test)
+rl_warnings(gui_gl_widget)
+set(_rl_gl_widget_env_mod "WAYLAND_DISPLAY=unset:;QT_QPA_PLATFORMTHEME=unset:;QT_SCALE_FACTOR=unset:;RASTERLOOM_CANVAS=unset:;RASTERLOOM_PLATFORM=unset:")
+add_test(NAME gui-canvas-hosting COMMAND gui_gl_widget canvas_hosting late_gl_failure_hosting)
+set_tests_properties(gui-canvas-hosting PROPERTIES
+    TIMEOUT 60
+    ENVIRONMENT "QT_QPA_PLATFORM=offscreen;XDG_CONFIG_HOME=${CMAKE_CURRENT_BINARY_DIR}/config-canvas-hosting"
+    ENVIRONMENT_MODIFICATION "DISPLAY=unset:;${_rl_gl_widget_env_mod}")
+add_test(NAME gui-gl-widget COMMAND gui_gl_widget gl_widget_frame)
+set_tests_properties(gui-gl-widget PROPERTIES
+    TIMEOUT 120
+    ENVIRONMENT "QT_QPA_PLATFORM=offscreen;XDG_CONFIG_HOME=${CMAKE_CURRENT_BINARY_DIR}/config-gl-widget"
+    ENVIRONMENT_MODIFICATION "${_rl_gl_widget_env_mod}"
+    SKIP_REGULAR_EXPRESSION "SKIP   :")
+add_test(NAME gui-gl-widget-xcb COMMAND gui_gl_widget)
+set_tests_properties(gui-gl-widget-xcb PROPERTIES
+    TIMEOUT 120
+    ENVIRONMENT "QT_QPA_PLATFORM=xcb;XDG_CONFIG_HOME=${CMAKE_CURRENT_BINARY_DIR}/config-gl-widget-xcb"
+    ENVIRONMENT_MODIFICATION "${_rl_gl_widget_env_mod}"
+    SKIP_REGULAR_EXPRESSION "SKIP   :")
+
 # The GUI binary's CLI flags (no display needed).
 add_test(NAME gui-version-verbose COMMAND rasterloom --version --verbose)
 set_tests_properties(gui-version-verbose PROPERTIES
@@ -94,6 +123,32 @@ set_tests_properties(gui-file-io PROPERTIES
     TIMEOUT 180
     ENVIRONMENT "QT_QPA_PLATFORM=offscreen;RASTERLOOM_CANVAS=raster"
     ENVIRONMENT_MODIFICATION "DISPLAY=unset:;WAYLAND_DISPLAY=unset:;QT_QPA_PLATFORMTHEME=unset:;QT_SCALE_FACTOR=unset:")
+
+# Getting images in (docs/math/60 §14 place_image / layer_via_copy / clear): drag-and-drop, the
+# system clipboard, Clear, Layer via Copy/Cut, and GIF/BMP/WebP through Qt's image plugins. One ctest
+# per PARITY row, each running one QtTest function on a fresh window.
+add_executable(gui_import "${CMAKE_CURRENT_SOURCE_DIR}/gui_import.cpp")
+set_target_properties(gui_import PROPERTIES AUTOMOC ON)
+target_link_libraries(gui_import PRIVATE rasterloomgui Qt6::Test)
+target_compile_definitions(gui_import PRIVATE RL_CLI="$<TARGET_FILE:rasterloom-cli>"
+                           RL_FIXTURES="${CMAKE_CURRENT_SOURCE_DIR}/fixtures")
+rl_warnings(gui_import)
+foreach(pair "drop-places-layer:drop_places_layer" "drop-opens-when-no-document:drop_opens_when_no_document"
+             "drop-multiple-files:drop_multiple_files" "drop-image-data:drop_browser_image"
+             "drop-unsupported-message:drop_unsupported_message" "copy-paste-clipboard:copy_paste_clipboard"
+             "paste-from-other-application:paste_from_other_application"
+             "paste-in-place-copy-merged:paste_in_place_and_copy_merged" "paste-new-document:paste_new_document"
+             "cut-and-clear:cut_and_clear" "layer-via-copy-cut:layer_via_copy_and_cut" "open-gif-bmp-webp:open_gif_bmp_webp"
+             "export-webp-bmp:export_webp_bmp")
+    string(REPLACE ":" ";" pair "${pair}")
+    list(GET pair 0 name)
+    list(GET pair 1 fn)
+    add_test(NAME gui-${name} COMMAND gui_import ${fn})
+    set_tests_properties(gui-${name} PROPERTIES
+        TIMEOUT 120
+        ENVIRONMENT "QT_QPA_PLATFORM=offscreen;RASTERLOOM_CANVAS=raster;XDG_CONFIG_HOME=${CMAKE_CURRENT_BINARY_DIR}/config-${name}"
+        ENVIRONMENT_MODIFICATION "DISPLAY=unset:;WAYLAND_DISPLAY=unset:;QT_QPA_PLATFORMTHEME=unset:;QT_SCALE_FACTOR=unset:")
+endforeach()
 
 # Layer editing through the doc-60 ops (rename, set_adjustment, duplicate, group mode, select_alpha, delete).
 add_executable(gui_editing "${CMAKE_CURRENT_SOURCE_DIR}/gui_editing.cpp")

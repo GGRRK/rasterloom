@@ -56,7 +56,7 @@ set_tests_properties(cli_env_mutation_13 PROPERTIES
     PASS_REGULAR_EXPRESSION "stats: pixels 'dot' allocated=256 total=256")
 add_test(NAME cli_version COMMAND "${RL_CLI}" --version)
 set_tests_properties(cli_version PROPERTIES PASS_REGULAR_EXPRESSION "^rasterloom-cli ${PROJECT_VERSION}")
-add_test(NAME cli_rejects_bad_mutation COMMAND "${RL_CLI}" --version --mutate=43)
+add_test(NAME cli_rejects_bad_mutation COMMAND "${RL_CLI}" --version --mutate=46)
 set_tests_properties(cli_rejects_bad_mutation PROPERTIES WILL_FAIL TRUE)
 
 # ---- GUI stub (offscreen only: never a visible window) --------------------------------------------
@@ -93,7 +93,7 @@ set_tests_properties(psd_ora_roundtrip_corpus PROPERTIES SKIP_RETURN_CODE 77 TIM
 #                    tests/output/report.json, which tools/gen_parity.py validates evidence against.
 # goldens_<domain>   the same per domain directory, so a red lane is visible at a glance.
 # goldens_determinism CLI only, no reference: two renders of every golden must agree.
-# mutation_gate      (label slow) ids 0-42 must each turn >= 1 golden red. PENDING ids (hook not
+# mutation_gate      (label slow) ids 0-45 must each turn >= 1 golden red. PENDING ids (hook not
 #                    implemented) fail the test unless RL_MUTATION_ALLOW_PENDING=1 is set.
 # Fast local loop: ctest -LE slow. Harness self-test: harness_selftest.
 find_package(Python3 COMPONENTS Interpreter)
@@ -125,7 +125,7 @@ if(Python3_Interpreter_FOUND)
     endforeach()
 
     add_test(NAME mutation_gate
-        COMMAND sh -c "extra=''; if [ \"\${RL_MUTATION_ALLOW_PENDING:-0}\" = 1 ]; then extra=--allow-pending; echo 'RL_MUTATION_ALLOW_PENDING=1: pending mutation ids tolerated'; fi; exec \"$0\" \"$1\" --cli \"$2\" --python \"$0\" --scripts \"$3\" --out \"$4\" --ids 0-42 $extra"
+        COMMAND sh -c "extra=''; if [ \"\${RL_MUTATION_ALLOW_PENDING:-0}\" = 1 ]; then extra=--allow-pending; echo 'RL_MUTATION_ALLOW_PENDING=1: pending mutation ids tolerated'; fi; exec \"$0\" \"$1\" --cli \"$2\" --python \"$0\" --scripts \"$3\" --out \"$4\" --ids 0-45 $extra"
                 "${Python3_EXECUTABLE}" "${RL_TOOLS}/mutation_gate.py" ${RL_CLI}
                 "${CMAKE_CURRENT_SOURCE_DIR}/scripts" "${CMAKE_CURRENT_BINARY_DIR}/mutation-gate")
     set_tests_properties(mutation_gate PROPERTIES LABELS "slow;goldens" TIMEOUT 3600)

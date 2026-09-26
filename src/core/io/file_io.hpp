@@ -23,6 +23,7 @@
 #include <vector>
 
 #include "core/doc/document.hpp"
+#include "core/io/png.hpp"
 
 namespace rl::io {
 
@@ -61,5 +62,9 @@ std::vector<uint8_t> encode_document(const DocState& s, FileFormat f, const Save
 // lock, mask presence, group boundaries and each node's foreign block keys + sha256), for
 // structural diffs (rasterloom-cli --dump-tree).
 std::string dump_tree_json(const DocState& s);
+
+// One raster layer (id "n1", name `name`) holding `img`, canonicalised: what opening a PNG, JPEG or
+// TIFF produces. The GUI uses it for formats only Qt's image plugins read (GIF, BMP, WebP, ...).
+DocState single_layer_document(const RgbaBuffer& img, const std::string& name);
 
 }  // namespace rl::io

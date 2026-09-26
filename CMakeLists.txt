@@ -2,7 +2,7 @@
 cmake_minimum_required(VERSION 3.21)
 
 project(Rasterloom
-    VERSION 0.1.0
+    VERSION 0.1.1
     DESCRIPTION "Native Linux raster image editor"
     LANGUAGES C CXX)
 

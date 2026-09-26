@@ -314,7 +314,7 @@ transform 14 · adjustments 24 · resample/alpha regression set 10.
 **The mutation gate.** The single most likely way this ships broken is an unattended agent producing
 a suite that only asserts "did not crash", because that is what optimizes for green CI.
 `--selftest-mutate=N` injects defect N into the core at runtime. **Every id in the mutation registry
-(currently 43 after the brush lane: 0-42) must be caught**, as a build-breaking step:
+(currently 46 after the import lane: 0-45) must be caught**, as a build-breaking step:
 
 ```bash
 for m in $(./rasterloom-cli --list-mutations | cut -f1); do
@@ -454,7 +454,7 @@ plumbing.
 - [ ] `librasterloomcore.a` links with zero Qt GUI symbols — assert this in CI, do not assume it.
 - [ ] 260+ goldens pass at `odiff --threshold=0` against `refcomp.py`.
 - [ ] Every render script produces identical bytes on two consecutive runs.
-- [ ] Every id in the mutation registry (currently 43 after the brush lane: 0-42) is detected; the
+- [ ] Every id in the mutation registry (currently 46 after the import lane: 0-45) is detected; the
       loop exits 0.
 - [ ] 12/12 PSD round-trips preserve the layer tree; `psd_tools` composites a non-black image.
 - [ ] The `.AppImage` self-test passes under `xvfb-run` on all 7 distro containers.

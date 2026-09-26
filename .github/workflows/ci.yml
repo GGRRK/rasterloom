@@ -60,14 +60,16 @@ jobs:
         uses: actions/cache@v4
         with:
           path: /opt/qt
-          key: qt-${{ env.QT_VERSION }}-${{ env.QT_ARCH }}-icu-qtbase-qtsvg-qtwayland-v1
+          key: qt-${{ env.QT_VERSION }}-${{ env.QT_ARCH }}-icu-qtbase-qtsvg-qtwayland-qtimageformats-v1
 
-      - name: Install Qt ${{ env.QT_VERSION }} (aqtinstall; qtbase + qtsvg + qtwayland)
+      - name: Install Qt ${{ env.QT_VERSION }} (aqtinstall; qtbase + qtsvg + qtwayland + qtimageformats)
         if: steps.qt-cache.outputs.cache-hit != 'true'
         run: |
           python3 -m aqt install-qt linux desktop "$QT_VERSION" "$QT_ARCH" \
-            --outputdir /opt/qt --archives icu qtbase qtsvg qtwayland
+            --outputdir /opt/qt --archives icu qtbase qtsvg qtwayland -m qtimageformats
           test -f "$QT_DIR/lib/cmake/Qt6/Qt6Config.cmake"
+          # WebP / TGA / ICNS / WBMP readers for Open, drag-and-drop and paste (GIF, BMP, ICO are in qtbase).
+          test -f "$QT_DIR/plugins/imageformats/libqwebp.so"
           find "$QT_DIR/plugins/platforms" -name '*.so' | grep -E 'libqwayland(-generic)?\.so'
 
       - name: Restore ccache
@@ -103,22 +105,28 @@ jobs:
       - name: GUI tests (Xvfb; GL canvas on Mesa llvmpipe)
         if: always()
         # Every GUI ctest: gui_version, gui_offscreen_smoke, gui_selftest_embedded and the tests/gui
-        # suite (gui-smoke, gui-session, gui-gl-canvas, gui-stroke-live, gui-file-io, gui-editing,
-        # gui-transform, gui-selftest, ...), hence '^gui[-_]'. The offscreen tests unset DISPLAY
-        # themselves; gui-gl-canvas keeps it and draws through GLX on Xvfb with llvmpipe. It skips
-        # itself without a GL 3.3 core context, which here would mean a broken runner: fail on it.
+        # suite (gui-smoke, gui-session, gui-gl-canvas, gui-gl-widget, gui-stroke-live, gui-file-io,
+        # gui-editing, gui-transform, gui-selftest, ...), hence '^gui[-_]'. The offscreen tests unset
+        # DISPLAY themselves; gui-gl-canvas and gui-gl-widget keep it and draw through GLX on Xvfb
+        # with llvmpipe. gui-gl-widget-xcb runs the real MainWindow on the xcb platform (a window on
+        # this Xvfb, allowed by RL_TEST_XCB=1) and also reads the window back from the X server.
+        # They skip themselves without a GL 3.3 core context, which here would mean a broken
+        # runner: fail on it.
         shell: bash
         env:
           LIBGL_ALWAYS_SOFTWARE: "1"
           GALLIUM_DRIVER: llvmpipe
+          RL_TEST_XCB: "1"
         run: |
           xvfb-run -a -s "-screen 0 1920x1080x24" \
             ctest --test-dir build -R '^gui[-_]' --output-on-failure --output-junit ctest-junit-gui.xml \
             | tee gui-ctest.log
-          if ! grep -qE 'gui-gl-canvas \.+ +Passed' gui-ctest.log; then
-            echo "::error::gui-gl-canvas did not pass on llvmpipe (skipped or failed)"
-            exit 1
-          fi
+          for t in gui-gl-canvas gui-gl-widget gui-gl-widget-xcb; do
+            if ! grep -qE "$t \.+ +Passed" gui-ctest.log; then
+              echo "::error::$t did not pass on llvmpipe (skipped or failed)"
+              exit 1
+            fi
+          done
 
       - name: Contact sheets from the C++ renders
         if: always()
@@ -206,14 +214,16 @@ jobs:
         uses: actions/cache@v4
         with:
           path: /opt/qt
-          key: qt-${{ env.QT_VERSION }}-${{ env.QT_ARCH }}-icu-qtbase-qtsvg-qtwayland-v1
+          key: qt-${{ env.QT_VERSION }}-${{ env.QT_ARCH }}-icu-qtbase-qtsvg-qtwayland-qtimageformats-v1
 
-      - name: Install Qt ${{ env.QT_VERSION }} (aqtinstall; qtbase + qtsvg + qtwayland)
+      - name: Install Qt ${{ env.QT_VERSION }} (aqtinstall; qtbase + qtsvg + qtwayland + qtimageformats)
         if: steps.qt-cache.outputs.cache-hit != 'true'
         run: |
           python3 -m aqt install-qt linux desktop "$QT_VERSION" "$QT_ARCH" \
-            --outputdir /opt/qt --archives icu qtbase qtsvg qtwayland
+            --outputdir /opt/qt --archives icu qtbase qtsvg qtwayland -m qtimageformats
           test -f "$QT_DIR/lib/cmake/Qt6/Qt6Config.cmake"
+          # WebP / TGA / ICNS / WBMP readers for Open, drag-and-drop and paste (GIF, BMP, ICO are in qtbase).
+          test -f "$QT_DIR/plugins/imageformats/libqwebp.so"
 
       - name: Restore ccache
         uses: actions/cache@v4

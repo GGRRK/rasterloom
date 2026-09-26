@@ -16,7 +16,7 @@ bundled:
     files: ['libQt6[A-Za-z]+\.so(\.[0-9.]+)?', 'plugin:.*']
     spdx: LGPL-3.0-only
     url: https://www.qt.io/
-    used_for: GUI toolkit (Core, Gui, Widgets, OpenGL, OpenGLWidgets, Svg, DBus, WaylandClient, XcbQpa and platform/image/icon plugins), dynamically linked
+    used_for: GUI toolkit (Core, Gui, Widgets, OpenGL, OpenGLWidgets, Svg, DBus, WaylandClient, XcbQpa and platform/image/icon plugins, including the qtimageformats readers for WebP, TIFF, TGA, WBMP and ICNS used by Open, drag-and-drop and paste), dynamically linked
   - name: Qt-Advanced-Docking-System
     files: ['libqtadvanceddocking-qt6\.so(\.[0-9.]+)?']
     spdx: LGPL-2.1-or-later
@@ -71,7 +71,7 @@ bundled:
     files: ['libwebp\.so(\.[0-9.]+)?', 'libwebpdemux\.so(\.[0-9.]+)?', 'libwebpmux\.so(\.[0-9.]+)?', 'libsharpyuv\.so(\.[0-9.]+)?']
     spdx: BSD-3-Clause
     url: https://chromium.googlesource.com/webm/libwebp
-    used_for: dependency of libtiff and the Qt WebP image plugin
+    used_for: dependency of libtiff
   - name: Little CMS (lcms2)
     files: ['liblcms2\.so(\.[0-9.]+)?']
     spdx: MIT
@@ -187,6 +187,33 @@ bundled:
     spdx: BSD-3-Clause OR GPL-2.0-only
     url: https://sites.google.com/site/fullycapable/
     used_for: dependency of host libraries
+
+# Third-party code compiled INTO a Qt plugin by the Qt binaries we bundle (the aqtinstall Qt of the
+# release build links qtimageformats' own copies of libwebp and libtiff statically; a distribution Qt
+# links the system libraries instead, which then appear under `bundled` above). Listed only when the
+# plugin is bundled and does not itself link the matching shared library (`unless_bundled`, checked
+# against the plugin's DT_NEEDED entries); the version comes from
+# the Qt install's SBOM (sbom/<module>-<version>.spdx.json, package `sbom_package`), the license text
+# from this repository.
+inside_qt_plugins:
+  - name: libwebp (inside Qt's WebP image plugin)
+    plugin: 'imageformats/libqwebp\.so'
+    unless_bundled: 'libwebp\.so(\.[0-9.]+)?'
+    sbom_module: qtimageformats
+    sbom_package: QWebpPlugin_Attribution_libwebp
+    spdx: BSD-3-Clause
+    url: https://chromium.googlesource.com/webm/libwebp
+    used_for: WebP decoding for Open, drag-and-drop and paste, compiled into imageformats/libqwebp.so
+    license_file: packaging/licenses/libwebp-COPYING.txt
+  - name: libtiff (inside Qt's TIFF image plugin)
+    plugin: 'imageformats/libqtiff\.so'
+    unless_bundled: 'libtiff\.so(\.[0-9.]+)?'
+    sbom_module: qtimageformats
+    sbom_package: QTiffPlugin_Attribution_libtiff
+    spdx: libtiff
+    url: https://libtiff.gitlab.io/libtiff/
+    used_for: TIFF decoding in Qt's plugin (Rasterloom's own TIFF import uses the core codec), compiled into imageformats/libqtiff.so
+    license_file: packaging/licenses/libtiff-LICENSE.md
 
 compiled_in:
   - name: JSON for Modern C++ (nlohmann-json)

@@ -30,6 +30,7 @@ EditorSession::~EditorSession() = default;
 void EditorSession::new_document(int w, int h, int background, rl::Rgba8 bg_color) {
     run_guard();
     cancel_preview();
+    placeholder_ = false;
     doc_ = std::make_unique<rl::Document>(w, h, rl::Rgba8{0, 0, 0, 0}, depth_);
     Json script = {{"canvas", {{"w", w}, {"h", h}, {"bg", "#00000000"}}}, {"ops", Json::array()}, {"out", "png8"}};
     if (background != 1) {
@@ -59,9 +60,40 @@ void EditorSession::new_document(int w, int h, int background, rl::Rgba8 bg_colo
     emit active_layer_changed();
 }
 
+OpResult EditorSession::new_document_from_op(int w, int h, const Json& op, const std::string& active, const QString& base_label) {
+    run_guard();
+    cancel_preview();
+    auto doc = std::make_unique<rl::Document>(w, h, rl::Rgba8{0, 0, 0, 0}, depth_);
+    OpResult r = apply_op(*doc, op);
+    if (!r.ok()) {
+        emit message(base_label + QStringLiteral(": ") + to_q(r.message), true);
+        return r;
+    }
+    placeholder_ = false;
+    doc_ = std::move(doc);
+    doc_->history().clear();
+    base_script_ = Json{{"canvas", {{"w", w}, {"h", h}, {"bg", "#00000000"}}}, {"ops", Json::array({op})}, {"out", "png8"}};
+    entries_.clear();
+    index_ = 0;
+    base_label_ = base_label;
+    path_.clear();
+    active_ = active;
+    edit_mask_ = false;
+    validate_active();
+    modified_ = false;
+    set_modified(true);  // an unsaved document with content
+    emit document_reset();
+    emit tree_changed();
+    emit selection_changed();
+    emit history_changed();
+    emit active_layer_changed();
+    return r;
+}
+
 void EditorSession::adopt_document(std::unique_ptr<rl::Document> doc, const QString& path, const QString& base_label) {
     run_guard();
     cancel_preview();
+    placeholder_ = false;
     doc_ = std::move(doc);
     doc_->history().clear();
     doc_->history().set_depth(depth_);

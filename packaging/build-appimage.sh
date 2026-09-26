@@ -106,6 +106,11 @@ for p in ${WAYLAND_PLUGINS//;/ } libqoffscreen.so libqxcb.so; do
     [ -f "$QT_PLUGINS/platforms/$p" ] || die "Qt has no platforms/$p (install qtwayland / qtbase plugins)"
 done
 [ -f "$QT_PLUGINS/iconengines/libqsvgicon.so" ] || die "Qt has no iconengines/libqsvgicon.so (qtsvg)"
+# linuxdeploy-plugin-qt deploys every plugin in imageformats/; Open, drag-and-drop and paste need
+# the qtimageformats readers (WebP, TGA, ...) on top of qtbase's GIF / ICO / JPEG.
+for p in libqgif.so libqico.so libqwebp.so libqtga.so; do
+    [ -f "$QT_PLUGINS/imageformats/$p" ] || die "Qt has no imageformats/$p (install qtimageformats: aqt -m qtimageformats, qt6-imageformats, qt6-image-formats-plugins)"
+done
 export EXTRA_PLATFORM_PLUGINS="$WAYLAND_PLUGINS;libqoffscreen.so"
 export EXTRA_QT_MODULES="waylandcompositor;svg"
 # Also let linuxdeploy resolve the Qt libraries of a non-system Qt (aqtinstall in CI).
@@ -163,6 +168,7 @@ if ! "$TOOLS/linuxdeploy-x86_64.AppImage" --appdir "$APPDIR" \
 fi
 grep -iE 'warn|error' "$OUT/linuxdeploy.log" | sort -u | head -20 || true
 [ -f "$APPDIR/usr/plugins/platforms/libqxcb.so" ] || die "linuxdeploy did not produce a Qt bundle (see output above)"
+[ -f "$APPDIR/usr/plugins/imageformats/libqwebp.so" ] || die "linuxdeploy did not bundle imageformats/libqwebp.so"
 # linuxdeploy honours --exclude-library for what it deploys itself, but linuxdeploy-plugin-qt
 # deploys the Qt plugins' dependencies on its own and ignores the list (measured: glib, systemd,
 # dbus and libwayland-{cursor,egl} still landed in usr/lib). Enforce the list here; every one of

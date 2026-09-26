@@ -56,6 +56,11 @@ need '^usr/plugins/xcbglintegrations/libqxcb-(glx|egl)-integration\.so$' "xcb GL
 echo "image and icon plugins"
 need '^usr/plugins/iconengines/libqsvgicon\.so$' "iconengines/libqsvgicon.so (else blank icons, no error)"
 need '^usr/plugins/imageformats/libqsvg\.so$' "imageformats/libqsvg.so"
+# Open / drag-and-drop / paste of formats the core has no codec for (gui/image_import.cpp).
+need '^usr/plugins/imageformats/libqgif\.so$' "imageformats/libqgif.so (GIF, qtbase)"
+need '^usr/plugins/imageformats/libqico\.so$' "imageformats/libqico.so (ICO/CUR, qtbase)"
+need '^usr/plugins/imageformats/libqwebp\.so$' "imageformats/libqwebp.so (WebP, qtimageformats)"
+need '^usr/plugins/imageformats/libqtga\.so$' "imageformats/libqtga.so (TGA, qtimageformats)"
 need '^usr/lib/libQt6Svg\.so' "libQt6Svg"
 echo "no driver or core session libraries"
 forbid '(^|/)lib(GL|EGL|GLdispatch|GLX|GLX_[^/]*|OpenGL|GLESv[12][^/]*|drm|gbm|vulkan|nvidia[^/]*|cuda)\.so' "no GL/EGL/drm/gbm/vulkan/driver libraries"
