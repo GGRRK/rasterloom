@@ -1,0 +1,9 @@
+{
+  "canvas": {"w": 64, "h": 64, "bg": "#00000000"},
+  "ops": [
+    {"op": "add_layer", "id": "L"},
+    {"op": "select_ellipse", "x": 8.0, "y": 8.0, "w": 48.0, "h": 48.0, "antialias": true},
+    {"op": "gradient", "layer": "L", "type": "linear", "p0": [0.0, 0.0], "p1": [64.0, 0.0], "c0": "#ff0000ff", "c1": "#ffff00ff", "opacity": 0.5}
+  ],
+  "out": "png8"
+}

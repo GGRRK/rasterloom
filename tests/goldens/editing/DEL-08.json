@@ -1,0 +1,11 @@
+{
+  "canvas": {"w": 64, "h": 64, "bg": "#808080FF"},
+  "ops": [
+    {"op": "add_layer", "id": "a", "fill": "solid", "color": "#10E080FF", "rect": [8, 8, 32, 32]},
+    {"op": "add_group", "id": "g"},
+    {"op": "add_layer", "id": "b", "parent": "g", "fill": "solid", "color": "#E03020FF", "rect": [24, 24, 32, 32]},
+    {"op": "delete_layer", "layer": "a"},
+    {"op": "delete_layer", "layer": "g"}
+  ],
+  "out": "png8"
+}

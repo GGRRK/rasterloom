@@ -1,0 +1,9 @@
+{
+  "canvas": {"w": 64, "h": 64, "bg": "#ffffffff"},
+  "ops": [
+    {"op": "add_layer", "id": "p", "fill": "solid", "color": "#20c060ff"},
+    {"op": "filter_offset", "layer": "p", "dx": 16, "dy": 12, "mode": "transparent"},
+    {"op": "filter_gaussian_blur", "layer": "p", "radius": 8.0, "edge": "transparent"}
+  ],
+  "out": "png8"
+}

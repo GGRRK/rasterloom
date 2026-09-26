@@ -1,0 +1,10 @@
+{
+  "canvas": {"w": 64, "h": 48, "bg": "#00000000"},
+  "ops": [
+    {"op": "add_layer", "id": "p", "fill": "gradient", "from": "#ff000000", "to": "#0000ffff", "dir": "h"},
+    {"op": "add_layer", "id": "q", "fill": "gradient", "from": "#00ff00c0", "to": "#ffff0000", "dir": "v"},
+    {"op": "merge_down", "layer": "q"},
+    {"op": "filter_motion_blur", "layer": "p", "angle": 30.0, "distance": 7.5}
+  ],
+  "out": "png8"
+}

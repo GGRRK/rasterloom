@@ -1,0 +1,839 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Rasterloom capability catalogue against Adobe Photoshop (desktop).
+#
+# This file is the single source of docs/PARITY.md and of the README headline. Generate with
+#   python3 tools/gen_parity.py --report tests/output/report.json --ctest-junit build/ctest-junit.xml
+# and never hand-edit PARITY.md or the README block between the parity markers.
+#
+# Source of the rows: Adobe's PUBLIC "Photoshop User Guide" on helpx.adobe.com (table of contents,
+# Tools, Filter effects reference, Supported file formats, Blending mode descriptions pages).
+# helpx.adobe.com answers automated requests with HTTP 403, so the pages were read through the
+# Internet Archive copies (web.archive.org/web/2025/https://helpx.adobe.com/photoshop/using/...)
+# on 2026-09-26. Photoshop itself was never run, read or probed.
+#
+# Rules (BUILD-SPEC <honest_scope>):
+#  - The denominator freezes at v1. Rows may be ADDED, never deleted;  is the only
+#    retirement path and needs `wontfix_reason`. Ids are stable: never renumber, append new ids.
+#  - status: missing | stub | functional | parity | wontfix. A stub counts as missing.
+#      functional = implemented in the core and proven by  that PASSED in the report
+#                   gen_parity.py is given; behaviour may differ from Photoshop in documented ways.
+#      parity     = as functional, AND the behaviour is the Photoshop semantics written down in
+#                   docs/math (W3C Compositing-1 / Adobe's public specs), proven byte-exact by
+#                   goldens against the independent NumPy reference (never against Adobe output).
+#  - `evidence` (required for functional/parity) is a list of "golden:<glob over golden names>"
+#    (tests/output/report.json; every match must PASS and at least one must match) or
+#    "ctest:<test name or glob>" (ctest --output-junit XML; same rule).
+#  - `planned_evidence` names the goldens that will prove a row once its lane lands. It is never
+#    counted; gen_parity.py lists rows whose planned evidence already passes (promotion hints).
+#  - tier 0 = "if these are missing it is not Photoshop" (about 100 rows), 1 = common
+#    professional use, 2 = specialist or legacy.
+#
+# Surface: every functional/parity row is proven through librasterloomcore and the render-script
+# API (rasterloom-cli, also the future scripting API) and, since the v0.1 GUI landed, is reachable
+# from the Qt GUI; rows whose evidence names ctest:gui-* are proven through the GUI itself.
+surface_note: "Statuses describe the core engine, proven through render scripts (rasterloom-cli), and the v0.1 Qt GUI. Every functional/parity row is reachable from the GUI's tools, menus or panels; the GUI as a whole is exercised by the gui-smoke test (30 scripted interactions plus every menu action), and rows citing ctest:gui-* are proven there. Tablet pressure is proven only through synthetic events."
+
+# Weighted everyday-workflow coverage =
+#   sum over areas of area_weight * (sum of tier weights of covered rows / sum of tier weights of
+#   all rows in the area), where a row is covered when status is functional or parity.
+# The ceiling is the same sum with every non-wontfix row covered. Area weights must sum to 1.0.
+# They estimate the share of an everyday photo/compositing session spent in each area.
+weights:
+  tier: {0: 4, 1: 2, 2: 1}
+  area:
+    LAYER: 0.13
+    SEL: 0.10
+    ADJ: 0.10
+    PAINT: 0.08
+    FILE: 0.08
+    TOOL: 0.07
+    MASK: 0.07
+    EDIT: 0.07
+    BLEND: 0.05
+    IMG: 0.05
+    FLT: 0.04
+    VIEW: 0.03
+    HIST: 0.03
+    TYPE: 0.03
+    COLOR: 0.02
+    STYLE: 0.02
+    VECTOR: 0.01
+    WS: 0.01
+    AUTO: 0.005
+    AI: 0.005
+    VIDEO: 0.0
+
+areas:
+  TOOL: {title: "Tools panel", source: "Photoshop User Guide: Workspace > Set up toolbars and panels; Tools gallery"}
+  FILE: {title: "File menu and file formats", source: "Photoshop User Guide: Create, open, and import images; Save and export; Supported file formats in Photoshop"}
+  EDIT: {title: "Edit menu", source: "Photoshop User Guide: Undo and history; Fill objects, selections, and layers; Transform, manipulate, and reshape"}
+  IMG: {title: "Image menu (modes, size, canvas)", source: "Photoshop User Guide: Color modes; Resize and adjust resolution; Crop and straighten"}
+  LAYER: {title: "Layers", source: "Photoshop User Guide: Create and manage layers; Layers overview; Organize layers with layer groups"}
+  MASK: {title: "Masks, clipping and channels", source: "Photoshop User Guide: Create masks; Layer masks; Clipping masks; Channel basics"}
+  BLEND: {title: "Blend modes and blending options", source: "Photoshop User Guide: Blending mode descriptions; Layer opacity and blending"}
+  SEL: {title: "Selections", source: "Photoshop User Guide: Make selections; Refine and modify selections"}
+  ADJ: {title: "Adjustments", source: "Photoshop User Guide: Color adjustment and fill layers; Color corrections"}
+  FLT: {title: "Filters", source: "Photoshop User Guide: Effects and filters; Filter effects reference"}
+  STYLE: {title: "Layer styles", source: "Photoshop User Guide: Apply layer effects; Layer style effects and options overview"}
+  COLOR: {title: "Color management and color picking", source: "Photoshop User Guide: Color profiles; Choose colors; Color settings"}
+  PAINT: {title: "Painting and brushes", source: "Photoshop User Guide: Apply painting techniques; Brushes and presets"}
+  TYPE: {title: "Type", source: "Photoshop User Guide: Text and typography"}
+  VECTOR: {title: "Paths and shapes", source: "Photoshop User Guide: Draw shapes and paths"}
+  VIEW: {title: "View, navigation and measurement", source: "Photoshop User Guide: Use grids and measurement guides; Overview of navigation and measuring tools"}
+  WS: {title: "Workspace and application", source: "Photoshop User Guide: Workspace overview; Settings and preferences; Troubleshoot"}
+  HIST: {title: "History", source: "Photoshop User Guide: Use Undo and Redo commands; History panel settings"}
+  AUTO: {title: "Automation", source: "Photoshop User Guide: Automate tasks"}
+  AI: {title: "Generative and neural features", source: "Photoshop User Guide: Generative AI in Photoshop; Neural filters"}
+  VIDEO: {title: "Video, animation, 3D and print", source: "Photoshop User Guide: Add video and animation; Print"}
+
+rows:
+  # ---- TOOL: Tools panel (Photoshop User Guide: Workspace > Set up toolbars and panels; Tools gallery)
+  - {id: TOOL-001, area: TOOL, name: "Move tool", tier: 0, status: functional, evidence: ["golden:geometry/TR-0[23]", "ctest:gui-smoke", "ctest:gui-move-tool-arrow-nudge"], note: "drags or arrow-nudges the active layer (a translate transform); no auto-select"}
+  - {id: TOOL-002, area: TOOL, name: "Artboard tool", tier: 1, status: missing}
+  - {id: TOOL-003, area: TOOL, name: "Rectangular Marquee tool", tier: 0, status: parity, evidence: ["golden:geometry/SEL-0[1-3]", "ctest:gui-smoke"]}
+  - {id: TOOL-004, area: TOOL, name: "Elliptical Marquee tool", tier: 0, status: parity, evidence: ["golden:geometry/SEL-0[4-6]", "golden:geometry/SEL-1[1-3]"]}
+  - {id: TOOL-005, area: TOOL, name: "Single Row Marquee tool", tier: 2, status: missing}
+  - {id: TOOL-006, area: TOOL, name: "Single Column Marquee tool", tier: 2, status: missing}
+  - {id: TOOL-007, area: TOOL, name: "Lasso tool", tier: 0, status: parity, evidence: ["golden:geometry/SEL-0[7-9]", "golden:geometry/SEL-10"], note: "freehand path is filled as a polygon"}
+  - {id: TOOL-008, area: TOOL, name: "Polygonal Lasso tool", tier: 0, status: parity, evidence: ["golden:geometry/SEL-0[7-9]", "golden:geometry/SEL-10"]}
+  - {id: TOOL-009, area: TOOL, name: "Magnetic Lasso tool", tier: 1, status: missing}
+  - {id: TOOL-010, area: TOOL, name: "Object Selection tool", tier: 1, status: wontfix, wontfix_reason: "proprietary Adobe ML model; not reproducible without Adobe's model"}
+  - {id: TOOL-011, area: TOOL, name: "Quick Selection tool", tier: 0, status: missing}
+  - {id: TOOL-012, area: TOOL, name: "Magic Wand tool", tier: 0, status: parity, evidence: ["golden:geometry/SEL-1[89]", "golden:geometry/SEL-2[0-2]", "ctest:GeometrySelection.RegionConnectivityAndFringe"]}
+  - {id: TOOL-013, area: TOOL, name: "Selection Brush tool", tier: 1, status: missing}
+  - {id: TOOL-014, area: TOOL, name: "Crop tool", tier: 0, status: functional, evidence: ["golden:geometry/RA-09", "ctest:gui-smoke"], note: "rectangle crop only: no straighten, ratio presets or non-destructive crop"}
+  - {id: TOOL-015, area: TOOL, name: "Perspective Crop tool", tier: 1, status: missing}
+  - {id: TOOL-016, area: TOOL, name: "Slice tool", tier: 2, status: missing}
+  - {id: TOOL-017, area: TOOL, name: "Slice Select tool", tier: 2, status: missing}
+  - {id: TOOL-018, area: TOOL, name: "Frame tool", tier: 1, status: missing}
+  - {id: TOOL-019, area: TOOL, name: "Eyedropper tool", tier: 0, status: functional, evidence: ["ctest:gui-smoke"], note: "samples the composite into the foreground colour; point sample only"}
+  - {id: TOOL-020, area: TOOL, name: "Color Sampler tool", tier: 1, status: missing}
+  - {id: TOOL-021, area: TOOL, name: "Ruler tool", tier: 1, status: missing}
+  - {id: TOOL-022, area: TOOL, name: "Note tool", tier: 2, status: missing}
+  - {id: TOOL-023, area: TOOL, name: "Count tool", tier: 2, status: missing}
+  - {id: TOOL-024, area: TOOL, name: "Spot Healing Brush tool", tier: 1, status: missing}
+  - {id: TOOL-025, area: TOOL, name: "Remove tool", tier: 1, status: wontfix, wontfix_reason: "proprietary Adobe ML model; not reproducible without Adobe's model"}
+  - {id: TOOL-026, area: TOOL, name: "Healing Brush tool", tier: 1, status: missing}
+  - {id: TOOL-027, area: TOOL, name: "Patch tool", tier: 1, status: missing}
+  - {id: TOOL-028, area: TOOL, name: "Content-Aware Move tool", tier: 1, status: wontfix, wontfix_reason: "PatchMatch-based (US patents, barred to 2031/2033 per BUILD-SPEC honest_scope)"}
+  - {id: TOOL-029, area: TOOL, name: "Red Eye tool", tier: 1, status: missing}
+  - {id: TOOL-030, area: TOOL, name: "Brush tool", tier: 0, status: parity, evidence: ["golden:brush/B0[1-9]", "golden:brush/B1*", "ctest:gui-smoke"], note: "round tip only"}
+  - {id: TOOL-031, area: TOOL, name: "Pencil tool", tier: 1, status: missing}
+  - {id: TOOL-032, area: TOOL, name: "Color Replacement tool", tier: 2, status: missing}
+  - {id: TOOL-033, area: TOOL, name: "Mixer Brush tool", tier: 2, status: missing}
+  - {id: TOOL-034, area: TOOL, name: "Clone Stamp tool", tier: 0, status: parity, evidence: ["golden:brush/B2[12]"], note: "current layer only, one source"}
+  - {id: TOOL-035, area: TOOL, name: "Pattern Stamp tool", tier: 2, status: missing}
+  - {id: TOOL-036, area: TOOL, name: "History Brush tool", tier: 1, status: missing}
+  - {id: TOOL-037, area: TOOL, name: "Art History Brush tool", tier: 2, status: missing}
+  - {id: TOOL-038, area: TOOL, name: "Eraser tool", tier: 0, status: parity, evidence: ["golden:brush/B19", "golden:brush/B20"], note: "brush mode only"}
+  - {id: TOOL-039, area: TOOL, name: "Background Eraser tool", tier: 1, status: missing}
+  - {id: TOOL-040, area: TOOL, name: "Magic Eraser tool", tier: 1, status: missing}
+  - {id: TOOL-041, area: TOOL, name: "Gradient tool", tier: 0, status: parity, evidence: ["golden:geometry/GR-*", "ctest:gui-smoke"], note: "linear and radial, two colour stops"}
+  - {id: TOOL-042, area: TOOL, name: "Paint Bucket tool", tier: 1, status: parity, evidence: ["golden:geometry/BK-*"]}
+  - {id: TOOL-043, area: TOOL, name: "Blur tool", tier: 2, status: missing}
+  - {id: TOOL-044, area: TOOL, name: "Sharpen tool", tier: 2, status: missing}
+  - {id: TOOL-045, area: TOOL, name: "Smudge tool", tier: 2, status: missing}
+  - {id: TOOL-046, area: TOOL, name: "Dodge tool", tier: 1, status: missing}
+  - {id: TOOL-047, area: TOOL, name: "Burn tool", tier: 1, status: missing}
+  - {id: TOOL-048, area: TOOL, name: "Sponge tool", tier: 1, status: missing}
+  - {id: TOOL-049, area: TOOL, name: "Pen tool", tier: 0, status: missing}
+  - {id: TOOL-050, area: TOOL, name: "Freeform Pen tool", tier: 1, status: missing}
+  - {id: TOOL-051, area: TOOL, name: "Curvature Pen tool", tier: 2, status: missing}
+  - {id: TOOL-052, area: TOOL, name: "Content-Aware Tracing tool", tier: 2, status: missing}
+  - {id: TOOL-053, area: TOOL, name: "Add Anchor Point tool", tier: 1, status: missing}
+  - {id: TOOL-054, area: TOOL, name: "Delete Anchor Point tool", tier: 1, status: missing}
+  - {id: TOOL-055, area: TOOL, name: "Convert Point tool", tier: 1, status: missing}
+  - {id: TOOL-056, area: TOOL, name: "Horizontal Type tool", tier: 0, status: missing}
+  - {id: TOOL-057, area: TOOL, name: "Vertical Type tool", tier: 1, status: missing}
+  - {id: TOOL-058, area: TOOL, name: "Horizontal Type Mask tool", tier: 2, status: missing}
+  - {id: TOOL-059, area: TOOL, name: "Vertical Type Mask tool", tier: 2, status: missing}
+  - {id: TOOL-060, area: TOOL, name: "Path Selection tool", tier: 1, status: missing}
+  - {id: TOOL-061, area: TOOL, name: "Direct Selection tool", tier: 1, status: missing}
+  - {id: TOOL-062, area: TOOL, name: "Rectangle tool", tier: 1, status: missing}
+  - {id: TOOL-063, area: TOOL, name: "Ellipse tool", tier: 1, status: missing}
+  - {id: TOOL-064, area: TOOL, name: "Triangle tool", tier: 1, status: missing}
+  - {id: TOOL-065, area: TOOL, name: "Polygon tool (including stars)", tier: 1, status: missing}
+  - {id: TOOL-066, area: TOOL, name: "Line tool (with arrowheads)", tier: 1, status: missing}
+  - {id: TOOL-067, area: TOOL, name: "Custom Shape tool", tier: 1, status: missing}
+  - {id: TOOL-068, area: TOOL, name: "Hand tool", tier: 0, status: functional, evidence: ["ctest:gui-hand-tool-pan"], note: "H, or hold Space with any tool; the view pans, the document never changes"}
+  - {id: TOOL-069, area: TOOL, name: "Rotate View tool", tier: 1, status: missing}
+  - {id: TOOL-070, area: TOOL, name: "Zoom tool", tier: 0, status: functional, evidence: ["ctest:gui-zoom-tool-click-drag"], note: "click / Alt+click steps at the pointer; a drag zooms to the rectangle (scrubby zoom is VIEW-002)"}
+  - {id: TOOL-071, area: TOOL, name: "Default foreground/background colors (D)", tier: 1, status: functional, evidence: ["ctest:gui-default-and-swap-colors"]}
+  - {id: TOOL-072, area: TOOL, name: "Switch foreground/background colors (X)", tier: 1, status: functional, evidence: ["ctest:gui-default-and-swap-colors"]}
+  - {id: TOOL-073, area: TOOL, name: "Foreground/background color swatches", tier: 0, status: functional, evidence: ["ctest:gui-smoke"]}
+  - {id: TOOL-074, area: TOOL, name: "Quick Mask mode", tier: 1, status: missing}
+  - {id: TOOL-075, area: TOOL, name: "Screen modes (standard / full screen with menus / full screen)", tier: 1, status: missing}
+  - {id: TOOL-076, area: TOOL, name: "Customize toolbar (Edit Toolbar, Extra Tools)", tier: 2, status: missing}
+  - {id: TOOL-077, area: TOOL, name: "Contextual Task Bar", tier: 2, status: missing}
+  - {id: TOOL-078, area: TOOL, name: "Spring-loaded tool shortcuts", tier: 2, status: missing}
+  - {id: TOOL-079, area: TOOL, name: "Tool presets", tier: 2, status: missing}
+  - {id: TOOL-080, area: TOOL, name: "3D Material Drop / Material Eyedropper tools", tier: 2, status: wontfix, wontfix_reason: "Adobe discontinued Photoshop 3D (removed in 2023); not a live Photoshop capability to match"}
+
+  # ---- FILE: File menu and file formats (Photoshop User Guide: Create, open, and import images; Save and export; Supported file formats in Photoshop)
+  - {id: FILE-001, area: FILE, name: "New document (size, resolution, background contents)", tier: 0, status: functional, evidence: ["golden:compositing/flatten_partial_bg", "ctest:Script.TopLevelShape"]}
+  - {id: FILE-002, area: FILE, name: "New document presets", tier: 1, status: missing}
+  - {id: FILE-003, area: FILE, name: "Open", tier: 0, status: functional, evidence: ["ctest:FileIo.EveryFormatSavesAndOpensByExtensionAndContent"], note: ".orp, .ora, PNG, JPEG, TIFF, PSD, PSB"}
+  - {id: FILE-004, area: FILE, name: "Open Recent", tier: 1, status: functional, evidence: ["ctest:gui-open-recent"], note: "10 most recent, newest first; files that no longer exist are listed disabled; Clear Recent"}
+  - {id: FILE-005, area: FILE, name: "Open as Smart Object", tier: 1, status: missing}
+  - {id: FILE-006, area: FILE, name: "Close / Close All", tier: 1, status: missing}
+  - {id: FILE-007, area: FILE, name: "Save", tier: 0, status: functional, evidence: ["ctest:FileIo.*", "ctest:AtomicSave.*", "ctest:Ora.OrpRoundTripsTheWholeModelLosslessly"], note: "native .orp (OpenRaster superset), atomic save"}
+  - {id: FILE-008, area: FILE, name: "Save As", tier: 0, status: functional, evidence: ["ctest:FileIo.*", "ctest:AtomicSave.*"], note: "Save As offers .orp and .ora; flat formats via Export"}
+  - {id: FILE-009, area: FILE, name: "Save a Copy", tier: 1, status: missing}
+  - {id: FILE-010, area: FILE, name: "Revert", tier: 1, status: missing}
+  - {id: FILE-011, area: FILE, name: "Place Embedded", tier: 2, status: missing}
+  - {id: FILE-012, area: FILE, name: "Place Linked", tier: 2, status: missing}
+  - {id: FILE-013, area: FILE, name: "Export As (format, size, quality)", tier: 1, status: missing}
+  - {id: FILE-014, area: FILE, name: "Quick Export as PNG", tier: 1, status: functional, evidence: ["ctest:Png.FileWriteMatchesMemoryEncodeAndDocumentExport"], note: "File > Export > PNG"}
+  - {id: FILE-015, area: FILE, name: "Export Layers to Files", tier: 2, status: missing}
+  - {id: FILE-016, area: FILE, name: "Export Artboards to Files / PDF", tier: 2, status: missing}
+  - {id: FILE-017, area: FILE, name: "Save for Web (Legacy)", tier: 2, status: missing}
+  - {id: FILE-018, area: FILE, name: "Export Color Lookup Tables", tier: 2, status: missing}
+  - {id: FILE-019, area: FILE, name: "Generate Image Assets from layer names", tier: 2, status: missing}
+  - {id: FILE-020, area: FILE, name: "File Info (metadata editing: IPTC, XMP)", tier: 2, status: missing}
+  - {id: FILE-021, area: FILE, name: "Print", tier: 1, status: missing}
+  - {id: FILE-022, area: FILE, name: "Print One Copy", tier: 2, status: missing}
+  - {id: FILE-023, area: FILE, name: "Import from scanner / device (WIA, TWAIN)", tier: 2, status: missing}
+  - {id: FILE-024, area: FILE, name: "Package (collect linked files)", tier: 2, status: missing}
+  - {id: FILE-025, area: FILE, name: "Cloud documents", tier: 2, status: wontfix, wontfix_reason: "depends on an Adobe cloud account service"}
+  - {id: FILE-026, area: FILE, name: "Content Credentials (C2PA) on export", tier: 2, status: missing}
+  - {id: FILE-027, area: FILE, name: "Photoshop PSD: read", tier: 0, status: functional, evidence: ["ctest:Psd.*", "ctest:psd_ora_roundtrip_corpus"], note: "16-bit and CMYK files are converted to 8-bit RGB on import; unknown tagged blocks are kept byte-for-byte"}
+  - {id: FILE-028, area: FILE, name: "Photoshop PSD: write (layers, groups, masks, merged composite)", tier: 0, status: functional, evidence: ["ctest:Psd.WriteReadPreservesTreeAndForeignBlocks", "ctest:Psd.MergedImageIsOurRenderWhiteMattedWithAlpha", "ctest:Psd.AllBlendModesRoundTripThroughTheirKeys", "ctest:psd_ora_roundtrip_corpus"], note: "8-bit RGB; merged composite written so other readers (GIMP) do not render black"}
+  - {id: FILE-029, area: FILE, name: "Large Document Format PSB: read/write", tier: 1, status: functional, evidence: ["ctest:Psd.PromotesToPsbAboveThirtyThousandAndOnRequest"]}
+  - {id: FILE-030, area: FILE, name: "PNG: read", tier: 0, status: functional, evidence: ["ctest:Png.RoundTripIsByteExactIncludingAlphaZeroColour"]}
+  - {id: FILE-031, area: FILE, name: "PNG: write", tier: 0, status: functional, evidence: ["golden:compositing/*", "ctest:Png.*"], note: "8-bit RGBA only; no 16-bit, no ICC chunk yet"}
+  - {id: FILE-032, area: FILE, name: "JPEG: read", tier: 0, status: functional, evidence: ["ctest:Raster.TiffRgbaIsExactAndJpegIsDeterministic", "ctest:FileIo.EveryFormatSavesAndOpensByExtensionAndContent"]}
+  - {id: FILE-033, area: FILE, name: "JPEG: write (quality, baseline/progressive)", tier: 0, status: functional, evidence: ["ctest:Raster.TiffRgbaIsExactAndJpegIsDeterministic", "ctest:FileIo.EveryFormatSavesAndOpensByExtensionAndContent"], note: "8-bit baseline; flattens the document"}
+  - {id: FILE-034, area: FILE, name: "TIFF: read", tier: 1, status: functional, evidence: ["ctest:Raster.TiffRgbaIsExactAndJpegIsDeterministic", "ctest:FileIo.EveryFormatSavesAndOpensByExtensionAndContent"], note: "8-bit RGB(A)"}
+  - {id: FILE-035, area: FILE, name: "TIFF: write (layers, compression options)", tier: 1, status: functional, evidence: ["ctest:Raster.TiffRgbaIsExactAndJpegIsDeterministic", "ctest:FileIo.EveryFormatSavesAndOpensByExtensionAndContent"], note: "flattened 8-bit RGBA only: no layers, no compression choice"}
+  - {id: FILE-036, area: FILE, name: "CompuServe GIF: read/write", tier: 1, status: missing}
+  - {id: FILE-037, area: FILE, name: "WebP: read/write", tier: 1, status: missing}
+  - {id: FILE-038, area: FILE, name: "BMP: read/write", tier: 1, status: missing}
+  - {id: FILE-039, area: FILE, name: "HEIF/HEIC: read/write", tier: 2, status: missing}
+  - {id: FILE-040, area: FILE, name: "AVIF: read/write", tier: 2, status: missing}
+  - {id: FILE-041, area: FILE, name: "JPEG 2000: read/write", tier: 2, status: missing}
+  - {id: FILE-042, area: FILE, name: "JPEG XL: read/write", tier: 2, status: missing}
+  - {id: FILE-043, area: FILE, name: "OpenEXR: read/write", tier: 2, status: missing}
+  - {id: FILE-044, area: FILE, name: "Radiance HDR: read/write", tier: 2, status: missing}
+  - {id: FILE-045, area: FILE, name: "Photoshop PDF: read/write", tier: 1, status: missing}
+  - {id: FILE-046, area: FILE, name: "Photoshop EPS: read/write", tier: 2, status: missing}
+  - {id: FILE-047, area: FILE, name: "Photoshop DCS 1.0/2.0", tier: 2, status: missing}
+  - {id: FILE-048, area: FILE, name: "Photoshop Raw (.raw)", tier: 2, status: missing}
+  - {id: FILE-049, area: FILE, name: "Targa (TGA): read/write", tier: 2, status: missing}
+  - {id: FILE-050, area: FILE, name: "Portable Bit Map (PBM/PGM/PPM/PAM)", tier: 2, status: missing}
+  - {id: FILE-051, area: FILE, name: "PCX, Pixar, Scitex CT, IFF, Wireless Bitmap", tier: 2, status: missing}
+  - {id: FILE-052, area: FILE, name: "Cineon / DPX", tier: 2, status: missing}
+  - {id: FILE-053, area: FILE, name: "DICOM", tier: 2, status: missing}
+  - {id: FILE-054, area: FILE, name: "PICT (read only)", tier: 2, status: missing}
+  - {id: FILE-055, area: FILE, name: "MPO / JPS (stereo JPEG)", tier: 2, status: missing}
+  - {id: FILE-056, area: FILE, name: "Camera raw files (DNG, CR3, NEF, ARW ...) via a raw converter", tier: 1, status: missing}
+
+  # ---- EDIT: Edit menu (Photoshop User Guide: Undo and history; Fill objects, selections, and layers; Transform, manipulate, and reshape)
+  - {id: EDIT-001, area: EDIT, name: "Undo", tier: 0, status: functional, evidence: ["ctest:History.UndoOpRestoresPixelsAndStructure", "ctest:gui-session", "ctest:gui-smoke"], note: "one record per gesture; Ctrl+Z in the GUI"}
+  - {id: EDIT-002, area: EDIT, name: "Redo", tier: 0, status: functional, evidence: ["ctest:gui-session", "ctest:gui-smoke"], note: "Ctrl+Shift+Z; redo restores the kept post-state"}
+  - {id: EDIT-003, area: EDIT, name: "Toggle last state", tier: 1, status: missing}
+  - {id: EDIT-004, area: EDIT, name: "Cut", tier: 0, status: missing}
+  - {id: EDIT-005, area: EDIT, name: "Copy", tier: 0, status: missing}
+  - {id: EDIT-006, area: EDIT, name: "Copy Merged", tier: 1, status: missing}
+  - {id: EDIT-007, area: EDIT, name: "Paste", tier: 0, status: missing}
+  - {id: EDIT-008, area: EDIT, name: "Paste in Place", tier: 1, status: missing}
+  - {id: EDIT-009, area: EDIT, name: "Paste Into / Paste Outside", tier: 1, status: missing}
+  - {id: EDIT-010, area: EDIT, name: "Clear (delete selected pixels)", tier: 1, status: missing}
+  - {id: EDIT-011, area: EDIT, name: "Fill selection or layer with a color", tier: 0, status: parity, evidence: ["golden:geometry/SEL-0[1-9]", "golden:geometry/BK-01"]}
+  - {id: EDIT-012, area: EDIT, name: "Fill: Content-Aware", tier: 1, status: wontfix, wontfix_reason: "PatchMatch-based (US patents, barred to 2031/2033 per BUILD-SPEC honest_scope)"}
+  - {id: EDIT-013, area: EDIT, name: "Fill: Pattern", tier: 1, status: missing}
+  - {id: EDIT-014, area: EDIT, name: "Fill: History", tier: 2, status: missing}
+  - {id: EDIT-015, area: EDIT, name: "Stroke (selection outline)", tier: 1, status: missing}
+  - {id: EDIT-016, area: EDIT, name: "Content-Aware Fill workspace", tier: 1, status: wontfix, wontfix_reason: "PatchMatch-based (US patents, barred to 2031/2033 per BUILD-SPEC honest_scope)"}
+  - {id: EDIT-017, area: EDIT, name: "Content-Aware Scale", tier: 2, status: wontfix, wontfix_reason: "seam carving (US7477800B2, expires 2027-03; reconsider then per BUILD-SPEC)"}
+  - {id: EDIT-018, area: EDIT, name: "Puppet Warp", tier: 1, status: missing}
+  - {id: EDIT-019, area: EDIT, name: "Perspective Warp", tier: 2, status: missing}
+  - {id: EDIT-020, area: EDIT, name: "Free Transform", tier: 0, status: parity, evidence: ["golden:geometry/TR-*", "ctest:gui-smoke"], note: "3x3 homography; bicubic with premultiply-around, or nearest"}
+  - {id: EDIT-021, area: EDIT, name: "Transform: Scale", tier: 1, status: parity, evidence: ["golden:geometry/TR-0[45]", "golden:geometry/RA-0[23]"]}
+  - {id: EDIT-022, area: EDIT, name: "Transform: Rotate", tier: 1, status: parity, evidence: ["golden:geometry/TR-0[67]", "golden:geometry/TR-13", "golden:geometry/RA-01"]}
+  - {id: EDIT-023, area: EDIT, name: "Transform: Skew", tier: 1, status: parity, evidence: ["golden:geometry/TR-08"]}
+  - {id: EDIT-024, area: EDIT, name: "Transform: Distort", tier: 1, status: parity, evidence: ["golden:geometry/TR-1[01]"], note: "corner quad"}
+  - {id: EDIT-025, area: EDIT, name: "Transform: Perspective", tier: 1, status: parity, evidence: ["golden:geometry/TR-09", "golden:geometry/TR-1[0-2]"]}
+  - {id: EDIT-026, area: EDIT, name: "Transform: Warp", tier: 1, status: missing}
+  - {id: EDIT-027, area: EDIT, name: "Split Warp / Cylindrical Warp", tier: 2, status: missing}
+  - {id: EDIT-028, area: EDIT, name: "Transform: Rotate 180 / 90 CW / 90 CCW (layer)", tier: 1, status: missing}
+  - {id: EDIT-029, area: EDIT, name: "Transform: Flip Horizontal / Vertical (layer)", tier: 1, status: functional, evidence: ["golden:geometry/TR-14"], note: "a mirror transform; the horizontal case is golden-tested"}
+  - {id: EDIT-030, area: EDIT, name: "Auto-Align Layers", tier: 1, status: missing}
+  - {id: EDIT-031, area: EDIT, name: "Auto-Blend Layers", tier: 1, status: missing}
+  - {id: EDIT-032, area: EDIT, name: "Sky Replacement", tier: 2, status: wontfix, wontfix_reason: "proprietary Adobe ML model; not reproducible without Adobe's model"}
+  - {id: EDIT-033, area: EDIT, name: "Define Brush Preset", tier: 1, status: missing}
+  - {id: EDIT-034, area: EDIT, name: "Define Pattern", tier: 1, status: missing}
+  - {id: EDIT-035, area: EDIT, name: "Define Custom Shape", tier: 2, status: missing}
+  - {id: EDIT-036, area: EDIT, name: "Purge (clipboard, histories, caches)", tier: 2, status: missing}
+  - {id: EDIT-037, area: EDIT, name: "Keyboard Shortcuts customization", tier: 2, status: missing}
+  - {id: EDIT-038, area: EDIT, name: "Menu customization", tier: 2, status: missing}
+  - {id: EDIT-039, area: EDIT, name: "Preferences", tier: 1, status: missing}
+  - {id: EDIT-040, area: EDIT, name: "Presets manager / export-import presets", tier: 2, status: missing}
+  - {id: EDIT-041, area: EDIT, name: "In-app Search", tier: 2, status: missing}
+  - {id: EDIT-042, area: EDIT, name: "Remote Connections", tier: 2, status: missing}
+
+  # ---- IMG: Image menu (modes, size, canvas) (Photoshop User Guide: Color modes; Resize and adjust resolution; Crop and straighten)
+  - {id: IMG-001, area: IMG, name: "Mode: Bitmap", tier: 1, status: missing}
+  - {id: IMG-002, area: IMG, name: "Mode: Grayscale", tier: 1, status: missing}
+  - {id: IMG-003, area: IMG, name: "Mode: Duotone", tier: 2, status: missing}
+  - {id: IMG-004, area: IMG, name: "Mode: Indexed Color (with color table)", tier: 1, status: missing}
+  - {id: IMG-005, area: IMG, name: "Mode: RGB Color", tier: 0, status: functional, evidence: ["golden:compositing/*"], note: "8-bit sRGB-assumed only"}
+  - {id: IMG-006, area: IMG, name: "Mode: CMYK Color", tier: 1, status: missing}
+  - {id: IMG-007, area: IMG, name: "Mode: Lab Color", tier: 2, status: missing}
+  - {id: IMG-008, area: IMG, name: "Mode: Multichannel", tier: 2, status: missing}
+  - {id: IMG-009, area: IMG, name: "8 bits per channel", tier: 1, status: functional, evidence: ["golden:compositing/*"]}
+  - {id: IMG-010, area: IMG, name: "16 bits per channel", tier: 1, status: missing}
+  - {id: IMG-011, area: IMG, name: "32 bits per channel (HDR)", tier: 2, status: missing}
+  - {id: IMG-012, area: IMG, name: "Auto Tone", tier: 1, status: missing}
+  - {id: IMG-013, area: IMG, name: "Auto Contrast", tier: 1, status: missing}
+  - {id: IMG-014, area: IMG, name: "Auto Color", tier: 1, status: missing}
+  - {id: IMG-015, area: IMG, name: "Image Size (resample to new pixel dimensions)", tier: 0, status: parity, evidence: ["golden:geometry/RA-0[4-6]", "ctest:GeometryCanvas.ImageSizeKeepsOpaqueOpaque"]}
+  - {id: IMG-016, area: IMG, name: "Resample methods (Nearest, Bilinear, Bicubic, Bicubic Smoother/Sharper)", tier: 1, status: functional, evidence: ["golden:geometry/RA-0[4-6]", "golden:geometry/TR-13"], note: "Bicubic and Nearest only"}
+  - {id: IMG-017, area: IMG, name: "Preserve Details 2.0 upscale", tier: 2, status: wontfix, wontfix_reason: "proprietary Adobe ML model; not reproducible without Adobe's model"}
+  - {id: IMG-018, area: IMG, name: "Canvas Size", tier: 0, status: parity, evidence: ["golden:geometry/RA-09", "ctest:GeometryCanvas.CanvasOpsClearSelectionAndResizeEverything"]}
+  - {id: IMG-019, area: IMG, name: "Image Rotation (90, 180, arbitrary)", tier: 1, status: parity, evidence: ["golden:geometry/RA-0[78]", "ctest:GeometryCanvas.RightAngleRotationsRoundTrip"]}
+  - {id: IMG-020, area: IMG, name: "Flip Canvas Horizontal / Vertical", tier: 1, status: parity, evidence: ["golden:geometry/RA-08"]}
+  - {id: IMG-021, area: IMG, name: "Crop to selection", tier: 1, status: parity, evidence: ["golden:geometry/RA-09"], note: "Image > Crop crops to the selection bounds"}
+  - {id: IMG-022, area: IMG, name: "Trim (transparent / corner color)", tier: 1, status: missing}
+  - {id: IMG-023, area: IMG, name: "Reveal All", tier: 1, status: missing}
+  - {id: IMG-024, area: IMG, name: "Duplicate image", tier: 1, status: missing}
+  - {id: IMG-025, area: IMG, name: "Apply Image", tier: 2, status: missing}
+  - {id: IMG-026, area: IMG, name: "Calculations", tier: 2, status: missing}
+  - {id: IMG-027, area: IMG, name: "Variables / data-driven graphics", tier: 2, status: missing}
+  - {id: IMG-028, area: IMG, name: "Trap", tier: 2, status: missing}
+  - {id: IMG-029, area: IMG, name: "Image resolution (ppi) metadata and print size", tier: 2, status: missing}
+
+  # ---- LAYER: Layers (Photoshop User Guide: Create and manage layers; Layers overview; Organize layers with layer groups)
+  - {id: LAYER-001, area: LAYER, name: "New layer", tier: 0, status: functional, evidence: ["golden:compositing/blend_norm_*", "golden:compositing/fo_lone_*"]}
+  - {id: LAYER-002, area: LAYER, name: "Delete layer", tier: 0, status: functional, evidence: ["golden:editing/DEL-*", "ctest:gui-session", "ctest:gui-editing", "ctest:gui-smoke"], note: "clipped layers keep their flags and re-clip to the next raster below (doc 60 parity note 1); deleting the last layer is allowed"}
+  - {id: LAYER-003, area: LAYER, name: "Duplicate layer", tier: 0, status: functional, evidence: ["golden:editing/DUP-*", "ctest:gui-editing"], note: "same document only; the copy is named \"<name> copy\" (no copy 2, copy 3 numbering)"}
+  - {id: LAYER-004, area: LAYER, name: "Rename layer", tier: 1, status: functional, evidence: ["golden:editing/NAME-*", "ctest:gui-session", "ctest:gui-editing"], note: "display name (set_name); ids stay immutable; at most 255 code points, no control characters"}
+  - {id: LAYER-005, area: LAYER, name: "Reorder layers (drag, Arrange commands)", tier: 0, status: functional, evidence: ["ctest:Script.MoveLayer", "ctest:Groups.NestedGroupsAndMovesRender"]}
+  - {id: LAYER-006, area: LAYER, name: "Layer opacity", tier: 0, status: parity, evidence: ["golden:compositing/fo_lone_opacity", "golden:compositing/blend_*_op50"]}
+  - {id: LAYER-007, area: LAYER, name: "Fill opacity (distinct from opacity)", tier: 0, status: parity, evidence: ["golden:compositing/fo_*"]}
+  - {id: LAYER-008, area: LAYER, name: "Layer visibility toggle", tier: 0, status: parity, evidence: ["golden:compositing/clip_hidden", "golden:compositing/grp_hidden_empty", "golden:compositing/merge_visible_hidden"]}
+  - {id: LAYER-009, area: LAYER, name: "Lock transparent pixels", tier: 0, status: parity, evidence: ["golden:adjust_filters/flt_gauss_lock_alpha", "golden:brush/B17", "golden:brush/B20", "ctest:BrushLock.*"]}
+  - {id: LAYER-010, area: LAYER, name: "Lock image pixels", tier: 1, status: missing}
+  - {id: LAYER-011, area: LAYER, name: "Lock position", tier: 1, status: missing}
+  - {id: LAYER-012, area: LAYER, name: "Lock all", tier: 1, status: missing}
+  - {id: LAYER-013, area: LAYER, name: "Prevent auto-nesting into/out of artboards", tier: 2, status: missing}
+  - {id: LAYER-014, area: LAYER, name: "Layer groups (nesting)", tier: 0, status: parity, evidence: ["golden:compositing/grp_*"]}
+  - {id: LAYER-015, area: LAYER, name: "Group blend modes other than Pass Through (isolated groups)", tier: 1, status: parity, evidence: ["golden:compositing/grp_iso_*"]}
+  - {id: LAYER-016, area: LAYER, name: "Merge Down", tier: 0, status: parity, evidence: ["golden:compositing/merge_down_*"]}
+  - {id: LAYER-017, area: LAYER, name: "Merge Visible", tier: 0, status: parity, evidence: ["golden:compositing/merge_visible_hidden", "ctest:Merge.MergeVisibleKeepsHiddenInPlaceAndIgnoresBg"]}
+  - {id: LAYER-018, area: LAYER, name: "Merge selected layers", tier: 1, status: missing}
+  - {id: LAYER-019, area: LAYER, name: "Flatten Image", tier: 0, status: parity, evidence: ["golden:compositing/flatten_partial_bg", "ctest:Merge.FlattenRendersIdenticallyAndResetsBg"]}
+  - {id: LAYER-020, area: LAYER, name: "Stamp Visible (merge to new layer)", tier: 1, status: missing}
+  - {id: LAYER-021, area: LAYER, name: "Background layer semantics (convert to/from normal layer)", tier: 1, status: missing}
+  - {id: LAYER-022, area: LAYER, name: "Link layers", tier: 1, status: missing}
+  - {id: LAYER-023, area: LAYER, name: "Select multiple layers", tier: 1, status: missing}
+  - {id: LAYER-024, area: LAYER, name: "Align layers", tier: 1, status: missing}
+  - {id: LAYER-025, area: LAYER, name: "Distribute layers", tier: 1, status: missing}
+  - {id: LAYER-026, area: LAYER, name: "Layer via Copy / Layer via Cut", tier: 1, status: missing}
+  - {id: LAYER-027, area: LAYER, name: "Adjustment layers (non-destructive)", tier: 0, status: functional, evidence: ["golden:compositing/*adjust*", "golden:adjust_filters/adj_*", "ctest:Groups.AdjustmentInsidePassThroughReachesBelowTheGroup"], note: "the eight v0.1 types: Levels, Curves, Brightness/Contrast, Hue/Saturation, Black & White, Invert, Posterize, Threshold"}
+  - {id: LAYER-028, area: LAYER, name: "Fill layer: Solid Color", tier: 1, status: missing}
+  - {id: LAYER-029, area: LAYER, name: "Fill layer: Gradient", tier: 1, status: missing}
+  - {id: LAYER-030, area: LAYER, name: "Fill layer: Pattern", tier: 2, status: missing}
+  - {id: LAYER-031, area: LAYER, name: "Layers panel thumbnails", tier: 1, status: functional, evidence: ["ctest:gui-smoke"]}
+  - {id: LAYER-032, area: LAYER, name: "Layers panel filtering (kind, name, effect, mode, attribute, color)", tier: 1, status: missing}
+  - {id: LAYER-033, area: LAYER, name: "Layer color labels", tier: 2, status: missing}
+  - {id: LAYER-034, area: LAYER, name: "Layer comps", tier: 1, status: missing}
+  - {id: LAYER-035, area: LAYER, name: "Artboards", tier: 2, status: missing}
+  - {id: LAYER-036, area: LAYER, name: "Smart Objects: embedded", tier: 1, status: missing}
+  - {id: LAYER-037, area: LAYER, name: "Smart Objects: linked", tier: 2, status: missing}
+  - {id: LAYER-038, area: LAYER, name: "Smart Filters", tier: 1, status: missing}
+  - {id: LAYER-039, area: LAYER, name: "Rasterize layer (type, shape, smart object)", tier: 1, status: missing}
+  - {id: LAYER-040, area: LAYER, name: "Layer Properties dialog", tier: 1, status: missing}
+  - {id: LAYER-041, area: LAYER, name: "Create document from layer / group", tier: 2, status: missing}
+  - {id: LAYER-042, area: LAYER, name: "Auto-select layer on canvas (Move tool)", tier: 1, status: missing}
+  - {id: LAYER-043, area: LAYER, name: "Nudge layer with arrow keys", tier: 1, status: functional, evidence: ["ctest:gui-move-tool-arrow-nudge"], note: "Move tool: 1 px, Shift 10 px, one history record per key press"}
+  - {id: LAYER-044, area: LAYER, name: "Show layer edges / transform handles", tier: 2, status: missing}
+  - {id: LAYER-045, area: LAYER, name: "Delete hidden layers", tier: 2, status: missing}
+  - {id: LAYER-046, area: LAYER, name: "Matting: Defringe, Remove Black/White Matte", tier: 2, status: missing}
+  - {id: LAYER-047, area: LAYER, name: "Collapse / expand all groups", tier: 2, status: missing}
+
+  # ---- MASK: Masks, clipping and channels (Photoshop User Guide: Create masks; Layer masks; Clipping masks; Channel basics)
+  - {id: MASK-001, area: MASK, name: "Layer mask: add (reveal all / hide all / from values)", tier: 0, status: parity, evidence: ["golden:compositing/mask_gradient", "golden:compositing/mask_order"]}
+  - {id: MASK-002, area: MASK, name: "Layer mask from selection", tier: 0, status: missing, note: "masks start as Reveal All / Hide All; no mask from the selection yet"}
+  - {id: MASK-003, area: MASK, name: "Paint on a layer mask", tier: 0, status: parity, evidence: ["golden:brush/B24", "ctest:BrushSession.ChunkedEqualsOpMask"]}
+  - {id: MASK-004, area: MASK, name: "Disable / enable layer mask", tier: 0, status: parity, evidence: ["golden:compositing/mask_disabled", "ctest:Masks.DisabledEqualsNoMaskAndApplyBakes"]}
+  - {id: MASK-005, area: MASK, name: "Delete layer mask", tier: 0, status: parity, evidence: ["golden:compositing/mask_deleted"]}
+  - {id: MASK-006, area: MASK, name: "Apply layer mask", tier: 0, status: parity, evidence: ["golden:compositing/mask_applied"]}
+  - {id: MASK-007, area: MASK, name: "Mask on a group", tier: 1, status: parity, evidence: ["golden:compositing/mask_group_rect", "golden:compositing/grp_pass_mask"]}
+  - {id: MASK-008, area: MASK, name: "Link / unlink mask and layer", tier: 1, status: missing}
+  - {id: MASK-009, area: MASK, name: "Mask density (Properties panel)", tier: 1, status: missing}
+  - {id: MASK-010, area: MASK, name: "Mask feather (Properties panel)", tier: 1, status: missing}
+  - {id: MASK-011, area: MASK, name: "Vector mask", tier: 1, status: missing}
+  - {id: MASK-012, area: MASK, name: "Clipping mask create / release", tier: 0, status: parity, evidence: ["golden:compositing/clip_*"]}
+  - {id: MASK-013, area: MASK, name: "Blend Clipped Layers as Group (clbl)", tier: 1, status: parity, evidence: ["golden:compositing/clip_clbl_*", "golden:compositing/fo_clip_fill0_clbl0"]}
+  - {id: MASK-014, area: MASK, name: "Invert mask", tier: 1, status: missing}
+  - {id: MASK-015, area: MASK, name: "View mask alone / rubylith overlay", tier: 1, status: missing}
+  - {id: MASK-016, area: MASK, name: "Load mask or layer transparency as selection", tier: 1, status: missing}
+  - {id: MASK-017, area: MASK, name: "Alpha channels: save / load selection", tier: 1, status: missing}
+  - {id: MASK-018, area: MASK, name: "Channels panel: view and edit individual channels", tier: 1, status: missing}
+  - {id: MASK-019, area: MASK, name: "Spot channels", tier: 2, status: missing}
+  - {id: MASK-020, area: MASK, name: "Mask all objects in a layer", tier: 2, status: wontfix, wontfix_reason: "proprietary Adobe ML model; not reproducible without Adobe's model"}
+
+  # ---- BLEND: Blend modes and blending options (Photoshop User Guide: Blending mode descriptions; Layer opacity and blending)
+  - {id: BLEND-001, area: BLEND, name: "Blend mode: Normal (norm)", tier: 0, status: parity, evidence: ["golden:compositing/blend_norm_*"]}
+  - {id: BLEND-002, area: BLEND, name: "Blend mode: Dissolve (diss)", tier: 0, status: parity, evidence: ["golden:compositing/blend_diss_*"]}
+  - {id: BLEND-003, area: BLEND, name: "Blend mode: Darken (dark)", tier: 0, status: parity, evidence: ["golden:compositing/blend_dark_*"]}
+  - {id: BLEND-004, area: BLEND, name: "Blend mode: Multiply (mul)", tier: 0, status: parity, evidence: ["golden:compositing/blend_mul_*"]}
+  - {id: BLEND-005, area: BLEND, name: "Blend mode: Color Burn (idiv)", tier: 0, status: parity, evidence: ["golden:compositing/blend_idiv_*"]}
+  - {id: BLEND-006, area: BLEND, name: "Blend mode: Linear Burn (lbrn)", tier: 0, status: parity, evidence: ["golden:compositing/blend_lbrn_*"]}
+  - {id: BLEND-007, area: BLEND, name: "Blend mode: Darker Color (dkCl)", tier: 0, status: parity, evidence: ["golden:compositing/blend_dkCl_*"]}
+  - {id: BLEND-008, area: BLEND, name: "Blend mode: Lighten (lite)", tier: 0, status: parity, evidence: ["golden:compositing/blend_lite_*"]}
+  - {id: BLEND-009, area: BLEND, name: "Blend mode: Screen (scrn)", tier: 0, status: parity, evidence: ["golden:compositing/blend_scrn_*"]}
+  - {id: BLEND-010, area: BLEND, name: "Blend mode: Color Dodge (div)", tier: 0, status: parity, evidence: ["golden:compositing/blend_div_*"]}
+  - {id: BLEND-011, area: BLEND, name: "Blend mode: Linear Dodge (Add) (lddg)", tier: 0, status: parity, evidence: ["golden:compositing/blend_lddg_*"]}
+  - {id: BLEND-012, area: BLEND, name: "Blend mode: Lighter Color (lgCl)", tier: 0, status: parity, evidence: ["golden:compositing/blend_lgCl_*"]}
+  - {id: BLEND-013, area: BLEND, name: "Blend mode: Overlay (over)", tier: 0, status: parity, evidence: ["golden:compositing/blend_over_*"]}
+  - {id: BLEND-014, area: BLEND, name: "Blend mode: Soft Light (sLit)", tier: 0, status: parity, evidence: ["golden:compositing/blend_sLit_*"]}
+  - {id: BLEND-015, area: BLEND, name: "Blend mode: Hard Light (hLit)", tier: 0, status: parity, evidence: ["golden:compositing/blend_hLit_*"]}
+  - {id: BLEND-016, area: BLEND, name: "Blend mode: Vivid Light (vLit)", tier: 0, status: parity, evidence: ["golden:compositing/blend_vLit_*"]}
+  - {id: BLEND-017, area: BLEND, name: "Blend mode: Linear Light (lLit)", tier: 0, status: parity, evidence: ["golden:compositing/blend_lLit_*"]}
+  - {id: BLEND-018, area: BLEND, name: "Blend mode: Pin Light (pLit)", tier: 0, status: parity, evidence: ["golden:compositing/blend_pLit_*"]}
+  - {id: BLEND-019, area: BLEND, name: "Blend mode: Hard Mix (hMix)", tier: 0, status: parity, evidence: ["golden:compositing/blend_hMix_*"]}
+  - {id: BLEND-020, area: BLEND, name: "Blend mode: Difference (diff)", tier: 0, status: parity, evidence: ["golden:compositing/blend_diff_*"]}
+  - {id: BLEND-021, area: BLEND, name: "Blend mode: Exclusion (smud)", tier: 0, status: parity, evidence: ["golden:compositing/blend_smud_*"]}
+  - {id: BLEND-022, area: BLEND, name: "Blend mode: Subtract (fsub)", tier: 0, status: parity, evidence: ["golden:compositing/blend_fsub_*"]}
+  - {id: BLEND-023, area: BLEND, name: "Blend mode: Divide (fdiv)", tier: 0, status: parity, evidence: ["golden:compositing/blend_fdiv_*"]}
+  - {id: BLEND-024, area: BLEND, name: "Blend mode: Hue (hue)", tier: 0, status: parity, evidence: ["golden:compositing/blend_hue_*"]}
+  - {id: BLEND-025, area: BLEND, name: "Blend mode: Saturation (sat)", tier: 0, status: parity, evidence: ["golden:compositing/blend_sat_*"]}
+  - {id: BLEND-026, area: BLEND, name: "Blend mode: Color (colr)", tier: 0, status: parity, evidence: ["golden:compositing/blend_colr_*"]}
+  - {id: BLEND-027, area: BLEND, name: "Blend mode: Luminosity (lum)", tier: 0, status: parity, evidence: ["golden:compositing/blend_lum_*"]}
+  - {id: BLEND-028, area: BLEND, name: "Blend mode: Pass Through (groups)", tier: 0, status: parity, evidence: ["golden:compositing/grp_pass_*"]}
+  - {id: BLEND-029, area: BLEND, name: "Blending Options: Blend If (This Layer / Underlying Layer)", tier: 1, status: missing}
+  - {id: BLEND-030, area: BLEND, name: "Blending Options: Knockout (shallow / deep)", tier: 1, status: missing}
+  - {id: BLEND-031, area: BLEND, name: "Blending Options: channel restrictions (R/G/B)", tier: 2, status: missing}
+  - {id: BLEND-032, area: BLEND, name: "Blending Options: Blend Interior Effects as Group", tier: 2, status: missing}
+  - {id: BLEND-033, area: BLEND, name: "Blending Options: Transparency Shapes Layer / Layer Mask Hides Effects", tier: 2, status: missing}
+  - {id: BLEND-034, area: BLEND, name: "Painting modes Behind and Clear", tier: 1, status: missing}
+  - {id: BLEND-035, area: BLEND, name: "Blend modes in 16-bit and 32-bit documents", tier: 1, status: missing}
+  - {id: BLEND-036, area: BLEND, name: "Blend mode cycling shortcuts (Shift +/-) and hover preview", tier: 2, status: missing}
+  - {id: BLEND-037, area: BLEND, name: "Fade command (Edit > Fade)", tier: 1, status: missing}
+
+  # ---- SEL: Selections (Photoshop User Guide: Make selections; Refine and modify selections)
+  - {id: SEL-001, area: SEL, name: "Select All", tier: 0, status: parity, evidence: ["golden:geometry/SEL-16", "ctest:GeometrySelection.FeatherSelectAllIsIdentityAndMaxRadiusIsSafe"]}
+  - {id: SEL-002, area: SEL, name: "Deselect", tier: 0, status: parity, evidence: ["golden:geometry/SEL-15", "ctest:GeometrySelection.DeselectReselectInverse"]}
+  - {id: SEL-003, area: SEL, name: "Reselect", tier: 1, status: parity, evidence: ["golden:geometry/SEL-15", "ctest:GeometrySelection.DeselectReselectInverse"]}
+  - {id: SEL-004, area: SEL, name: "Inverse", tier: 0, status: parity, evidence: ["golden:geometry/SEL-17", "golden:geometry/SEL-22"]}
+  - {id: SEL-005, area: SEL, name: "Select All Layers / Find Layers / Isolate Layers", tier: 2, status: missing}
+  - {id: SEL-006, area: SEL, name: "Color Range", tier: 1, status: missing}
+  - {id: SEL-007, area: SEL, name: "Focus Area", tier: 2, status: missing}
+  - {id: SEL-008, area: SEL, name: "Select Subject", tier: 1, status: wontfix, wontfix_reason: "proprietary Adobe ML model; not reproducible without Adobe's model"}
+  - {id: SEL-009, area: SEL, name: "Select Sky", tier: 2, status: wontfix, wontfix_reason: "proprietary Adobe ML model; not reproducible without Adobe's model"}
+  - {id: SEL-010, area: SEL, name: "Select People", tier: 2, status: wontfix, wontfix_reason: "proprietary Adobe ML model; not reproducible without Adobe's model"}
+  - {id: SEL-011, area: SEL, name: "Select and Mask workspace", tier: 1, status: missing}
+  - {id: SEL-012, area: SEL, name: "Refine Edge brush / Refine Hair", tier: 2, status: missing}
+  - {id: SEL-013, area: SEL, name: "Modify: Border", tier: 1, status: missing}
+  - {id: SEL-014, area: SEL, name: "Modify: Smooth", tier: 1, status: missing}
+  - {id: SEL-015, area: SEL, name: "Modify: Expand", tier: 1, status: parity, evidence: ["golden:geometry/SEL-24", "ctest:GeometrySelection.ExpandContractMatchDiscDefinition"]}
+  - {id: SEL-016, area: SEL, name: "Modify: Contract", tier: 1, status: parity, evidence: ["golden:geometry/SEL-16", "ctest:GeometrySelection.ExpandContractMatchDiscDefinition"]}
+  - {id: SEL-017, area: SEL, name: "Modify: Feather", tier: 0, status: parity, evidence: ["golden:geometry/SEL-23", "golden:geometry/RA-0*", "ctest:GeometrySelection.FeatherSelectAllIsIdentityAndMaxRadiusIsSafe"]}
+  - {id: SEL-018, area: SEL, name: "Grow", tier: 1, status: missing}
+  - {id: SEL-019, area: SEL, name: "Similar", tier: 1, status: missing}
+  - {id: SEL-020, area: SEL, name: "Transform Selection", tier: 1, status: missing}
+  - {id: SEL-021, area: SEL, name: "Save Selection / Load Selection", tier: 1, status: missing}
+  - {id: SEL-022, area: SEL, name: "Selection modes: new / add / subtract / intersect", tier: 0, status: parity, evidence: ["golden:geometry/SEL-1[1-6]"]}
+  - {id: SEL-023, area: SEL, name: "Anti-aliased selection edges", tier: 1, status: parity, evidence: ["golden:geometry/SEL-02", "golden:geometry/SEL-21"]}
+  - {id: SEL-024, area: SEL, name: "Feather option on marquee and lasso tools", tier: 1, status: missing}
+  - {id: SEL-025, area: SEL, name: "Fixed ratio / fixed size marquee style", tier: 1, status: missing}
+  - {id: SEL-026, area: SEL, name: "Move selection border", tier: 1, status: missing}
+  - {id: SEL-027, area: SEL, name: "Show / hide selection edges", tier: 1, status: missing}
+  - {id: SEL-028, area: SEL, name: "Magic Wand tolerance, contiguous and sample-all-layers options", tier: 1, status: functional, evidence: ["golden:geometry/SEL-19", "golden:geometry/SEL-2[0-2]"], note: "tolerance, contiguous and anti-alias"}
+  - {id: SEL-029, area: SEL, name: "Selection from layer transparency (Ctrl-click thumbnail)", tier: 1, status: functional, evidence: ["golden:editing/SAL-*", "ctest:gui-editing"], note: "Shift adds, Alt subtracts, Shift+Alt intersects; raster layers only (a group or adjustment thumbnail is not a source in v0.1)"}
+  - {id: SEL-030, area: SEL, name: "Delete and Fill Selection", tier: 2, status: wontfix, wontfix_reason: "server-side generative AI (Adobe Firefly / cloud service); no local equivalent can be shipped"}
+  - {id: SEL-031, area: SEL, name: "New 3D Extrusion from selection", tier: 2, status: wontfix, wontfix_reason: "Adobe discontinued Photoshop 3D (removed in 2023); not a live Photoshop capability to match"}
+
+  # ---- ADJ: Adjustments (Photoshop User Guide: Color adjustment and fill layers; Color corrections)
+  - {id: ADJ-001, area: ADJ, name: "Brightness/Contrast", tier: 0, status: parity, evidence: ["golden:adjust_filters/adj_bc_*", "ctest:AdjustBrightnessContrast.EdgeCases"]}
+  - {id: ADJ-002, area: ADJ, name: "Levels", tier: 0, status: parity, evidence: ["golden:adjust_filters/adj_levels_*", "ctest:AdjustLevels.*"]}
+  - {id: ADJ-003, area: ADJ, name: "Curves", tier: 0, status: parity, evidence: ["golden:adjust_filters/adj_curves_*", "ctest:AdjustCurves.*"]}
+  - {id: ADJ-004, area: ADJ, name: "Exposure", tier: 1, status: missing}
+  - {id: ADJ-005, area: ADJ, name: "Vibrance", tier: 1, status: missing}
+  - {id: ADJ-006, area: ADJ, name: "Hue/Saturation (including Colorize)", tier: 0, status: parity, evidence: ["golden:adjust_filters/adj_hs_*", "ctest:AdjustHueSaturation.*"]}
+  - {id: ADJ-007, area: ADJ, name: "Color Balance", tier: 1, status: missing}
+  - {id: ADJ-008, area: ADJ, name: "Black & White", tier: 1, status: parity, evidence: ["golden:adjust_filters/adj_bw_*", "ctest:AdjustBlackWhite.*"]}
+  - {id: ADJ-009, area: ADJ, name: "Photo Filter", tier: 1, status: missing}
+  - {id: ADJ-010, area: ADJ, name: "Channel Mixer", tier: 2, status: missing}
+  - {id: ADJ-011, area: ADJ, name: "Color Lookup (3D LUT)", tier: 2, status: missing}
+  - {id: ADJ-012, area: ADJ, name: "Invert", tier: 1, status: parity, evidence: ["golden:adjust_filters/adj_invert_alpha", "ctest:Adjust.InvertKeepsAlphaAndLerps"]}
+  - {id: ADJ-013, area: ADJ, name: "Posterize", tier: 1, status: parity, evidence: ["golden:adjust_filters/adj_posterize_4", "ctest:AdjustPosterizeThreshold.Luts"]}
+  - {id: ADJ-014, area: ADJ, name: "Threshold", tier: 1, status: parity, evidence: ["golden:adjust_filters/adj_threshold", "ctest:AdjustPosterizeThreshold.Luts"]}
+  - {id: ADJ-015, area: ADJ, name: "Gradient Map", tier: 1, status: missing}
+  - {id: ADJ-016, area: ADJ, name: "Selective Color", tier: 1, status: missing}
+  - {id: ADJ-017, area: ADJ, name: "Shadows/Highlights", tier: 1, status: missing}
+  - {id: ADJ-018, area: ADJ, name: "HDR Toning", tier: 2, status: missing}
+  - {id: ADJ-019, area: ADJ, name: "Desaturate", tier: 1, status: missing}
+  - {id: ADJ-020, area: ADJ, name: "Match Color", tier: 2, status: missing}
+  - {id: ADJ-021, area: ADJ, name: "Replace Color", tier: 2, status: missing}
+  - {id: ADJ-022, area: ADJ, name: "Equalize", tier: 2, status: missing}
+  - {id: ADJ-023, area: ADJ, name: "Adjustment presets", tier: 2, status: missing}
+  - {id: ADJ-024, area: ADJ, name: "Re-edit adjustment layer settings (Properties panel)", tier: 1, status: functional, evidence: ["golden:editing/ADJ-*", "ctest:gui-editing"], note: "double-click or Layer Properties opens the settings dialog with live preview (not a docked Properties panel); all params are replaced at once"}
+  - {id: ADJ-025, area: ADJ, name: "Camera Raw Filter (raw-style develop controls)", tier: 1, status: missing}
+  - {id: ADJ-026, area: ADJ, name: "Adjustment layer clipped to one layer", tier: 2, status: parity, evidence: ["golden:compositing/clip_adjust"]}
+
+  # ---- FLT: Filters (Photoshop User Guide: Effects and filters; Filter effects reference)
+  - {id: FLT-001, area: FLT, name: "Filter Gallery (preview, stacking)", tier: 1, status: missing}
+  - {id: FLT-002, area: FLT, name: "Adaptive Wide Angle", tier: 2, status: missing}
+  - {id: FLT-003, area: FLT, name: "Lens Correction", tier: 1, status: missing}
+  - {id: FLT-004, area: FLT, name: "Liquify", tier: 1, status: missing}
+  - {id: FLT-005, area: FLT, name: "Vanishing Point", tier: 2, status: missing}
+  - {id: FLT-006, area: FLT, name: "Generate Bump Map / Normal Map", tier: 2, status: wontfix, wontfix_reason: "Adobe discontinued Photoshop 3D (removed in 2023); not a live Photoshop capability to match"}
+  - {id: FLT-007, area: FLT, name: "Blur: Average", tier: 2, status: missing}
+  - {id: FLT-008, area: FLT, name: "Blur: Blur / Blur More", tier: 2, status: missing}
+  - {id: FLT-009, area: FLT, name: "Blur: Box Blur", tier: 2, status: missing}
+  - {id: FLT-010, area: FLT, name: "Blur: Gaussian Blur", tier: 0, status: parity, evidence: ["golden:adjust_filters/flt_gauss_*", "ctest:FilterGaussian.*"], note: "3-pass box approximation, O(1) in radius (BUILD-SPEC)"}
+  - {id: FLT-011, area: FLT, name: "Blur: Lens Blur", tier: 1, status: missing}
+  - {id: FLT-012, area: FLT, name: "Blur: Motion Blur", tier: 1, status: parity, evidence: ["golden:adjust_filters/flt_motion_*", "ctest:FilterMotion.*"]}
+  - {id: FLT-013, area: FLT, name: "Blur: Radial Blur", tier: 2, status: missing}
+  - {id: FLT-014, area: FLT, name: "Blur: Shape Blur", tier: 2, status: missing}
+  - {id: FLT-015, area: FLT, name: "Blur: Smart Blur", tier: 2, status: missing}
+  - {id: FLT-016, area: FLT, name: "Blur: Surface Blur", tier: 1, status: missing}
+  - {id: FLT-017, area: FLT, name: "Blur Gallery: Field Blur", tier: 2, status: missing}
+  - {id: FLT-018, area: FLT, name: "Blur Gallery: Iris Blur", tier: 2, status: missing}
+  - {id: FLT-019, area: FLT, name: "Blur Gallery: Tilt-Shift", tier: 2, status: missing}
+  - {id: FLT-020, area: FLT, name: "Blur Gallery: Path Blur", tier: 2, status: missing}
+  - {id: FLT-021, area: FLT, name: "Blur Gallery: Spin Blur", tier: 2, status: missing}
+  - {id: FLT-022, area: FLT, name: "Distort: Displace", tier: 2, status: missing}
+  - {id: FLT-023, area: FLT, name: "Distort: Pinch", tier: 2, status: missing}
+  - {id: FLT-024, area: FLT, name: "Distort: Polar Coordinates", tier: 2, status: missing}
+  - {id: FLT-025, area: FLT, name: "Distort: Ripple", tier: 2, status: missing}
+  - {id: FLT-026, area: FLT, name: "Distort: Shear", tier: 2, status: missing}
+  - {id: FLT-027, area: FLT, name: "Distort: Spherize", tier: 2, status: missing}
+  - {id: FLT-028, area: FLT, name: "Distort: Twirl", tier: 2, status: missing}
+  - {id: FLT-029, area: FLT, name: "Distort: Wave", tier: 2, status: missing}
+  - {id: FLT-030, area: FLT, name: "Distort: ZigZag", tier: 2, status: missing}
+  - {id: FLT-031, area: FLT, name: "Distort: Diffuse Glow", tier: 2, status: missing}
+  - {id: FLT-032, area: FLT, name: "Distort: Glass", tier: 2, status: missing}
+  - {id: FLT-033, area: FLT, name: "Distort: Ocean Ripple", tier: 2, status: missing}
+  - {id: FLT-034, area: FLT, name: "Noise: Add Noise", tier: 1, status: parity, evidence: ["golden:adjust_filters/flt_noise_*", "ctest:FilterNoise.*"], note: "splitmix64 noise: deterministic per seed, not Adobe's generator"}
+  - {id: FLT-035, area: FLT, name: "Noise: Despeckle", tier: 2, status: missing}
+  - {id: FLT-036, area: FLT, name: "Noise: Dust & Scratches", tier: 1, status: missing}
+  - {id: FLT-037, area: FLT, name: "Noise: Median", tier: 1, status: missing}
+  - {id: FLT-038, area: FLT, name: "Noise: Reduce Noise", tier: 1, status: missing}
+  - {id: FLT-039, area: FLT, name: "Pixelate: Color Halftone", tier: 2, status: missing}
+  - {id: FLT-040, area: FLT, name: "Pixelate: Crystallize", tier: 2, status: missing}
+  - {id: FLT-041, area: FLT, name: "Pixelate: Facet", tier: 2, status: missing}
+  - {id: FLT-042, area: FLT, name: "Pixelate: Fragment", tier: 2, status: missing}
+  - {id: FLT-043, area: FLT, name: "Pixelate: Mezzotint", tier: 2, status: missing}
+  - {id: FLT-044, area: FLT, name: "Pixelate: Mosaic", tier: 1, status: missing}
+  - {id: FLT-045, area: FLT, name: "Pixelate: Pointillize", tier: 2, status: missing}
+  - {id: FLT-046, area: FLT, name: "Render: Flame / Picture Frame / Tree", tier: 2, status: missing}
+  - {id: FLT-047, area: FLT, name: "Render: Clouds", tier: 1, status: missing}
+  - {id: FLT-048, area: FLT, name: "Render: Difference Clouds", tier: 2, status: missing}
+  - {id: FLT-049, area: FLT, name: "Render: Fibers", tier: 2, status: missing}
+  - {id: FLT-050, area: FLT, name: "Render: Lens Flare", tier: 2, status: missing}
+  - {id: FLT-051, area: FLT, name: "Render: Lighting Effects", tier: 2, status: missing}
+  - {id: FLT-052, area: FLT, name: "Sharpen: Shake Reduction", tier: 2, status: missing}
+  - {id: FLT-053, area: FLT, name: "Sharpen: Sharpen / Sharpen More / Sharpen Edges", tier: 2, status: missing}
+  - {id: FLT-054, area: FLT, name: "Sharpen: Smart Sharpen", tier: 1, status: missing}
+  - {id: FLT-055, area: FLT, name: "Sharpen: Unsharp Mask", tier: 0, status: parity, evidence: ["golden:adjust_filters/flt_usm_*", "ctest:FilterUnsharpHighPass.*"]}
+  - {id: FLT-056, area: FLT, name: "Stylize: Diffuse", tier: 2, status: missing}
+  - {id: FLT-057, area: FLT, name: "Stylize: Emboss", tier: 2, status: missing}
+  - {id: FLT-058, area: FLT, name: "Stylize: Extrude", tier: 2, status: missing}
+  - {id: FLT-059, area: FLT, name: "Stylize: Find Edges", tier: 2, status: missing}
+  - {id: FLT-060, area: FLT, name: "Stylize: Oil Paint", tier: 2, status: missing}
+  - {id: FLT-061, area: FLT, name: "Stylize: Solarize", tier: 2, status: missing}
+  - {id: FLT-062, area: FLT, name: "Stylize: Tiles", tier: 2, status: missing}
+  - {id: FLT-063, area: FLT, name: "Stylize: Trace Contour", tier: 2, status: missing}
+  - {id: FLT-064, area: FLT, name: "Stylize: Wind", tier: 2, status: missing}
+  - {id: FLT-065, area: FLT, name: "Stylize: Glowing Edges", tier: 2, status: missing}
+  - {id: FLT-066, area: FLT, name: "Video: De-Interlace", tier: 2, status: missing}
+  - {id: FLT-067, area: FLT, name: "Video: NTSC Colors", tier: 2, status: missing}
+  - {id: FLT-068, area: FLT, name: "Other: Custom (convolution kernel)", tier: 2, status: missing}
+  - {id: FLT-069, area: FLT, name: "Other: High Pass", tier: 1, status: parity, evidence: ["golden:adjust_filters/flt_high_pass", "ctest:FilterUnsharpHighPass.*"]}
+  - {id: FLT-070, area: FLT, name: "Other: HSB/HSL", tier: 2, status: missing}
+  - {id: FLT-071, area: FLT, name: "Other: Maximum", tier: 1, status: missing}
+  - {id: FLT-072, area: FLT, name: "Other: Minimum", tier: 1, status: missing}
+  - {id: FLT-073, area: FLT, name: "Other: Offset", tier: 1, status: parity, evidence: ["golden:adjust_filters/flt_offset_*", "ctest:FilterOffset.*"]}
+  - {id: FLT-074, area: FLT, name: "Filters respect the active selection", tier: 1, status: parity, evidence: ["golden:adjust_filters/flt_offset_repeat_rect_cov", "golden:adjust_filters/flt_gauss_r45_ramp_coverage", "ctest:FilterFramework.CoverageMasks"]}
+  - {id: FLT-075, area: FLT, name: "Repeat last filter", tier: 1, status: functional, evidence: ["ctest:gui-repeat-last-filter"], note: "Ctrl+F: same settings, active layer, current selection; no Ctrl+Alt+F (reopen the dialog)"}
+  - {id: FLT-076, area: FLT, name: "Smart Filter masks and blending", tier: 1, status: missing}
+  - {id: FLT-077, area: FLT, name: "Digimarc: Embed / Read Watermark", tier: 2, status: wontfix, wontfix_reason: "proprietary Digimarc technology"}
+  - {id: FLT-078, area: FLT, name: "Third-party .8bf filter plug-ins", tier: 2, status: wontfix, wontfix_reason: "Adobe .8bf plug-in ABI; BUILD-SPEC phase 0.6 ships a native C ABI instead, never .8bf"}
+  - {id: FLT-079, area: FLT, name: "Filter Gallery Artistic: Colored Pencil", tier: 2, status: missing}
+  - {id: FLT-080, area: FLT, name: "Filter Gallery Artistic: Cutout", tier: 2, status: missing}
+  - {id: FLT-081, area: FLT, name: "Filter Gallery Artistic: Dry Brush", tier: 2, status: missing}
+  - {id: FLT-082, area: FLT, name: "Filter Gallery Artistic: Film Grain", tier: 2, status: missing}
+  - {id: FLT-083, area: FLT, name: "Filter Gallery Artistic: Fresco", tier: 2, status: missing}
+  - {id: FLT-084, area: FLT, name: "Filter Gallery Artistic: Neon Glow", tier: 2, status: missing}
+  - {id: FLT-085, area: FLT, name: "Filter Gallery Artistic: Paint Daubs", tier: 2, status: missing}
+  - {id: FLT-086, area: FLT, name: "Filter Gallery Artistic: Palette Knife", tier: 2, status: missing}
+  - {id: FLT-087, area: FLT, name: "Filter Gallery Artistic: Plastic Wrap", tier: 2, status: missing}
+  - {id: FLT-088, area: FLT, name: "Filter Gallery Artistic: Poster Edges", tier: 2, status: missing}
+  - {id: FLT-089, area: FLT, name: "Filter Gallery Artistic: Rough Pastels", tier: 2, status: missing}
+  - {id: FLT-090, area: FLT, name: "Filter Gallery Artistic: Smudge Stick", tier: 2, status: missing}
+  - {id: FLT-091, area: FLT, name: "Filter Gallery Artistic: Sponge", tier: 2, status: missing}
+  - {id: FLT-092, area: FLT, name: "Filter Gallery Artistic: Underpainting", tier: 2, status: missing}
+  - {id: FLT-093, area: FLT, name: "Filter Gallery Artistic: Watercolor", tier: 2, status: missing}
+  - {id: FLT-094, area: FLT, name: "Filter Gallery Brush Strokes: Accented Edges", tier: 2, status: missing}
+  - {id: FLT-095, area: FLT, name: "Filter Gallery Brush Strokes: Angled Strokes", tier: 2, status: missing}
+  - {id: FLT-096, area: FLT, name: "Filter Gallery Brush Strokes: Crosshatch", tier: 2, status: missing}
+  - {id: FLT-097, area: FLT, name: "Filter Gallery Brush Strokes: Dark Strokes", tier: 2, status: missing}
+  - {id: FLT-098, area: FLT, name: "Filter Gallery Brush Strokes: Ink Outlines", tier: 2, status: missing}
+  - {id: FLT-099, area: FLT, name: "Filter Gallery Brush Strokes: Spatter", tier: 2, status: missing}
+  - {id: FLT-100, area: FLT, name: "Filter Gallery Brush Strokes: Sprayed Strokes", tier: 2, status: missing}
+  - {id: FLT-101, area: FLT, name: "Filter Gallery Brush Strokes: Sumi-e", tier: 2, status: missing}
+  - {id: FLT-102, area: FLT, name: "Filter Gallery Sketch: Bas Relief", tier: 2, status: missing}
+  - {id: FLT-103, area: FLT, name: "Filter Gallery Sketch: Chalk & Charcoal", tier: 2, status: missing}
+  - {id: FLT-104, area: FLT, name: "Filter Gallery Sketch: Charcoal", tier: 2, status: missing}
+  - {id: FLT-105, area: FLT, name: "Filter Gallery Sketch: Chrome", tier: 2, status: missing}
+  - {id: FLT-106, area: FLT, name: "Filter Gallery Sketch: Conte Crayon", tier: 2, status: missing}
+  - {id: FLT-107, area: FLT, name: "Filter Gallery Sketch: Graphic Pen", tier: 2, status: missing}
+  - {id: FLT-108, area: FLT, name: "Filter Gallery Sketch: Halftone Pattern", tier: 2, status: missing}
+  - {id: FLT-109, area: FLT, name: "Filter Gallery Sketch: Note Paper", tier: 2, status: missing}
+  - {id: FLT-110, area: FLT, name: "Filter Gallery Sketch: Photocopy", tier: 2, status: missing}
+  - {id: FLT-111, area: FLT, name: "Filter Gallery Sketch: Plaster", tier: 2, status: missing}
+  - {id: FLT-112, area: FLT, name: "Filter Gallery Sketch: Reticulation", tier: 2, status: missing}
+  - {id: FLT-113, area: FLT, name: "Filter Gallery Sketch: Stamp", tier: 2, status: missing}
+  - {id: FLT-114, area: FLT, name: "Filter Gallery Sketch: Torn Edges", tier: 2, status: missing}
+  - {id: FLT-115, area: FLT, name: "Filter Gallery Sketch: Water Paper", tier: 2, status: missing}
+  - {id: FLT-116, area: FLT, name: "Filter Gallery Texture: Craquelure", tier: 2, status: missing}
+  - {id: FLT-117, area: FLT, name: "Filter Gallery Texture: Grain", tier: 2, status: missing}
+  - {id: FLT-118, area: FLT, name: "Filter Gallery Texture: Mosaic Tiles", tier: 2, status: missing}
+  - {id: FLT-119, area: FLT, name: "Filter Gallery Texture: Patchwork", tier: 2, status: missing}
+  - {id: FLT-120, area: FLT, name: "Filter Gallery Texture: Stained Glass", tier: 2, status: missing}
+  - {id: FLT-121, area: FLT, name: "Filter Gallery Texture: Texturizer", tier: 2, status: missing}
+
+  # ---- STYLE: Layer styles (Photoshop User Guide: Apply layer effects; Layer style effects and options overview)
+  - {id: STYLE-001, area: STYLE, name: "Layer style: Drop Shadow", tier: 1, status: missing}
+  - {id: STYLE-002, area: STYLE, name: "Layer style: Inner Shadow", tier: 2, status: missing}
+  - {id: STYLE-003, area: STYLE, name: "Layer style: Outer Glow", tier: 2, status: missing}
+  - {id: STYLE-004, area: STYLE, name: "Layer style: Inner Glow", tier: 2, status: missing}
+  - {id: STYLE-005, area: STYLE, name: "Layer style: Bevel & Emboss (with Contour and Texture)", tier: 1, status: missing}
+  - {id: STYLE-006, area: STYLE, name: "Layer style: Satin", tier: 2, status: missing}
+  - {id: STYLE-007, area: STYLE, name: "Layer style: Color Overlay", tier: 1, status: missing}
+  - {id: STYLE-008, area: STYLE, name: "Layer style: Gradient Overlay", tier: 1, status: missing}
+  - {id: STYLE-009, area: STYLE, name: "Layer style: Pattern Overlay", tier: 2, status: missing}
+  - {id: STYLE-010, area: STYLE, name: "Layer style: Stroke", tier: 1, status: missing}
+  - {id: STYLE-011, area: STYLE, name: "Multiple instances of one effect", tier: 2, status: missing}
+  - {id: STYLE-012, area: STYLE, name: "Global Light angle", tier: 2, status: missing}
+  - {id: STYLE-013, area: STYLE, name: "Contour presets", tier: 2, status: missing}
+  - {id: STYLE-014, area: STYLE, name: "Styles panel and style presets", tier: 2, status: missing}
+  - {id: STYLE-015, area: STYLE, name: "Copy / paste layer style", tier: 1, status: missing}
+  - {id: STYLE-016, area: STYLE, name: "Scale layer effects", tier: 2, status: missing}
+  - {id: STYLE-017, area: STYLE, name: "Create layers from effects", tier: 2, status: missing}
+  - {id: STYLE-018, area: STYLE, name: "Preserve layer styles on PSD round-trip (lfx2)", tier: 1, status: missing}
+
+  # ---- COLOR: Color management and color picking (Photoshop User Guide: Color profiles; Choose colors; Color settings)
+  - {id: COLOR-001, area: COLOR, name: "Color Settings (working spaces, policies)", tier: 1, status: missing}
+  - {id: COLOR-002, area: COLOR, name: "Assign Profile", tier: 1, status: missing}
+  - {id: COLOR-003, area: COLOR, name: "Convert to Profile", tier: 1, status: missing}
+  - {id: COLOR-004, area: COLOR, name: "Honor embedded ICC profile on open", tier: 1, status: missing}
+  - {id: COLOR-005, area: COLOR, name: "Embed ICC profile on save", tier: 1, status: missing}
+  - {id: COLOR-006, area: COLOR, name: "Proof Setup / soft proofing", tier: 2, status: missing}
+  - {id: COLOR-007, area: COLOR, name: "Gamut warning", tier: 2, status: missing}
+  - {id: COLOR-008, area: COLOR, name: "Display color management (monitor profile)", tier: 1, status: missing}
+  - {id: COLOR-009, area: COLOR, name: "Rendering intent choice", tier: 2, status: missing}
+  - {id: COLOR-010, area: COLOR, name: "Black point compensation", tier: 2, status: missing}
+  - {id: COLOR-011, area: COLOR, name: "Color Picker (HSB, RGB, Lab, CMYK, hex)", tier: 0, status: missing}
+  - {id: COLOR-012, area: COLOR, name: "Color panel", tier: 1, status: missing}
+  - {id: COLOR-013, area: COLOR, name: "Swatches panel", tier: 1, status: missing}
+  - {id: COLOR-014, area: COLOR, name: "Web-safe colors", tier: 2, status: missing}
+  - {id: COLOR-015, area: COLOR, name: "Spot color libraries (Pantone)", tier: 2, status: wontfix, wontfix_reason: "licensed proprietary content library (Pantone/Adobe Stock/Adobe Fonts)"}
+  - {id: COLOR-016, area: COLOR, name: "CMYK equivalent for out-of-gamut colors", tier: 2, status: missing}
+
+  # ---- PAINT: Painting and brushes (Photoshop User Guide: Apply painting techniques; Brushes and presets)
+  - {id: PAINT-001, area: PAINT, name: "Brush size", tier: 0, status: parity, evidence: ["golden:brush/B01"]}
+  - {id: PAINT-002, area: PAINT, name: "Brush hardness", tier: 1, status: parity, evidence: ["golden:brush/B0[23]"]}
+  - {id: PAINT-003, area: PAINT, name: "Brush opacity", tier: 0, status: parity, evidence: ["golden:brush/B08", "golden:brush/B10"]}
+  - {id: PAINT-004, area: PAINT, name: "Brush flow", tier: 1, status: parity, evidence: ["golden:brush/B08", "golden:brush/B11"], note: "flow is a lerp toward the opacity ceiling (Wash)"}
+  - {id: PAINT-005, area: PAINT, name: "Airbrush / build-up mode", tier: 1, status: parity, evidence: ["golden:brush/B09", "golden:brush/B16"], note: "Build-up mode and a dabs_per_second airbrush term"}
+  - {id: PAINT-006, area: PAINT, name: "Pen pressure controls size", tier: 0, status: parity, evidence: ["golden:brush/B12", "golden:brush/B13"], note: "16-point curve baked to a 256-entry LUT"}
+  - {id: PAINT-007, area: PAINT, name: "Pen pressure controls opacity / flow", tier: 1, status: parity, evidence: ["golden:brush/B14"]}
+  - {id: PAINT-008, area: PAINT, name: "Tilt, rotation and stylus wheel controls", tier: 2, status: missing}
+  - {id: PAINT-009, area: PAINT, name: "Brush spacing", tier: 1, status: parity, evidence: ["golden:brush/B05", "golden:brush/B06", "golden:brush/B26"]}
+  - {id: PAINT-010, area: PAINT, name: "Brush angle and roundness", tier: 1, status: parity, evidence: ["golden:brush/B04"]}
+  - {id: PAINT-011, area: PAINT, name: "Stroke smoothing", tier: 1, status: parity, evidence: ["golden:brush/B15"], note: "EMA stabilizer"}
+  - {id: PAINT-012, area: PAINT, name: "Shape Dynamics jitter", tier: 2, status: missing}
+  - {id: PAINT-013, area: PAINT, name: "Scattering", tier: 2, status: missing}
+  - {id: PAINT-014, area: PAINT, name: "Brush Texture", tier: 2, status: missing}
+  - {id: PAINT-015, area: PAINT, name: "Dual Brush", tier: 2, status: missing}
+  - {id: PAINT-016, area: PAINT, name: "Color Dynamics", tier: 2, status: missing}
+  - {id: PAINT-017, area: PAINT, name: "Transfer (opacity / flow jitter)", tier: 2, status: missing}
+  - {id: PAINT-018, area: PAINT, name: "Brush Pose", tier: 2, status: missing}
+  - {id: PAINT-019, area: PAINT, name: "Noise / Wet Edges / Protect Texture", tier: 2, status: missing}
+  - {id: PAINT-020, area: PAINT, name: "Sampled brush tips (brush from image)", tier: 1, status: missing}
+  - {id: PAINT-021, area: PAINT, name: "Erodible and bristle tips", tier: 2, status: missing}
+  - {id: PAINT-022, area: PAINT, name: "Brush presets panel and ABR import", tier: 1, status: missing}
+  - {id: PAINT-023, area: PAINT, name: "Symmetry painting", tier: 2, status: missing}
+  - {id: PAINT-024, area: PAINT, name: "Painting blend mode (tool mode)", tier: 1, status: missing}
+  - {id: PAINT-025, area: PAINT, name: "Straight line with Shift-click", tier: 1, status: missing}
+  - {id: PAINT-026, area: PAINT, name: "Eraser modes (brush / pencil / block)", tier: 1, status: missing}
+  - {id: PAINT-027, area: PAINT, name: "Erase to History", tier: 1, status: missing}
+  - {id: PAINT-028, area: PAINT, name: "Gradient Editor (stops, opacity stops, midpoints)", tier: 1, status: missing}
+  - {id: PAINT-029, area: PAINT, name: "Gradient: Linear", tier: 0, status: parity, evidence: ["golden:geometry/GR-01", "golden:geometry/GR-0[34]"]}
+  - {id: PAINT-030, area: PAINT, name: "Gradient: Radial", tier: 1, status: parity, evidence: ["golden:geometry/GR-02"]}
+  - {id: PAINT-031, area: PAINT, name: "Gradient: Angle / Reflected / Diamond", tier: 2, status: missing}
+  - {id: PAINT-032, area: PAINT, name: "Gradient dither", tier: 1, status: missing}
+  - {id: PAINT-033, area: PAINT, name: "Live (editable) gradients", tier: 2, status: missing}
+  - {id: PAINT-034, area: PAINT, name: "Paint Bucket tolerance / contiguous / all layers", tier: 1, status: parity, evidence: ["golden:geometry/BK-*"], note: "tolerance, contiguous and anti-alias"}
+  - {id: PAINT-035, area: PAINT, name: "Clone Source panel (multiple sources, offset, scale / rotate)", tier: 1, status: missing}
+  - {id: PAINT-036, area: PAINT, name: "Clone aligned vs non-aligned", tier: 1, status: parity, evidence: ["golden:brush/B21", "golden:brush/B22"]}
+  - {id: PAINT-037, area: PAINT, name: "Sample current / all layers for clone and heal", tier: 1, status: missing}
+  - {id: PAINT-038, area: PAINT, name: "Painting respects the active selection", tier: 1, status: parity, evidence: ["golden:brush/B18", "ctest:BrushSession.ChunkedEqualWithSelection"]}
+  - {id: PAINT-039, area: PAINT, name: "One undo step per brush stroke", tier: 1, status: parity, evidence: ["golden:brush/B23", "ctest:BrushHistory.brush_history_granularity"]}
+  - {id: PAINT-040, area: PAINT, name: "On-canvas brush size / hardness drag", tier: 1, status: missing}
+  - {id: PAINT-041, area: PAINT, name: "Eyedropper sample size (point, 3x3 ... average)", tier: 1, status: missing}
+
+  # ---- TYPE: Type (Photoshop User Guide: Text and typography)
+  - {id: TYPE-001, area: TYPE, name: "Point type", tier: 0, status: missing}
+  - {id: TYPE-002, area: TYPE, name: "Paragraph (area) type", tier: 1, status: missing}
+  - {id: TYPE-003, area: TYPE, name: "Font family and style selection", tier: 1, status: missing}
+  - {id: TYPE-004, area: TYPE, name: "Font size", tier: 1, status: missing}
+  - {id: TYPE-005, area: TYPE, name: "Leading, tracking, kerning", tier: 1, status: missing}
+  - {id: TYPE-006, area: TYPE, name: "Baseline shift, horizontal / vertical scale", tier: 2, status: missing}
+  - {id: TYPE-007, area: TYPE, name: "Faux bold / italic, all caps, super / subscript", tier: 2, status: missing}
+  - {id: TYPE-008, area: TYPE, name: "Text color", tier: 1, status: missing}
+  - {id: TYPE-009, area: TYPE, name: "Paragraph alignment and justification", tier: 1, status: missing}
+  - {id: TYPE-010, area: TYPE, name: "Indents and paragraph spacing", tier: 2, status: missing}
+  - {id: TYPE-011, area: TYPE, name: "Hyphenation", tier: 2, status: missing}
+  - {id: TYPE-012, area: TYPE, name: "Bulleted and numbered lists", tier: 2, status: missing}
+  - {id: TYPE-013, area: TYPE, name: "Text anti-aliasing methods", tier: 1, status: missing}
+  - {id: TYPE-014, area: TYPE, name: "Warp text", tier: 1, status: missing}
+  - {id: TYPE-015, area: TYPE, name: "Type on a path", tier: 1, status: missing}
+  - {id: TYPE-016, area: TYPE, name: "Type inside a shape", tier: 2, status: missing}
+  - {id: TYPE-017, area: TYPE, name: "Vertical text", tier: 2, status: missing}
+  - {id: TYPE-018, area: TYPE, name: "OpenType features", tier: 1, status: missing}
+  - {id: TYPE-019, area: TYPE, name: "Variable fonts", tier: 2, status: missing}
+  - {id: TYPE-020, area: TYPE, name: "OpenType SVG / color emoji fonts", tier: 2, status: missing}
+  - {id: TYPE-021, area: TYPE, name: "Glyphs panel", tier: 2, status: missing}
+  - {id: TYPE-022, area: TYPE, name: "Match Font", tier: 2, status: wontfix, wontfix_reason: "proprietary Adobe ML model; not reproducible without Adobe's model"}
+  - {id: TYPE-023, area: TYPE, name: "Adobe Fonts activation", tier: 2, status: wontfix, wontfix_reason: "licensed proprietary content library (Pantone/Adobe Stock/Adobe Fonts)"}
+  - {id: TYPE-024, area: TYPE, name: "Missing font replacement", tier: 1, status: missing}
+  - {id: TYPE-025, area: TYPE, name: "Convert text to shape / work path", tier: 1, status: missing}
+  - {id: TYPE-026, area: TYPE, name: "Rasterize type", tier: 1, status: missing}
+  - {id: TYPE-027, area: TYPE, name: "Character and paragraph styles", tier: 2, status: missing}
+  - {id: TYPE-028, area: TYPE, name: "Complex scripts (Arabic, Hebrew, Indic)", tier: 2, status: missing}
+  - {id: TYPE-029, area: TYPE, name: "Find and Replace Text", tier: 2, status: missing}
+  - {id: TYPE-030, area: TYPE, name: "Spell check", tier: 2, status: missing}
+  - {id: TYPE-031, area: TYPE, name: "Edit text on canvas", tier: 1, status: missing}
+  - {id: TYPE-032, area: TYPE, name: "Text layers preserved on PSD round-trip (TySh / Txt2)", tier: 1, status: missing}
+
+  # ---- VECTOR: Paths and shapes (Photoshop User Guide: Draw shapes and paths)
+  - {id: VECTOR-001, area: VECTOR, name: "Paths panel (work path, saved paths)", tier: 1, status: missing}
+  - {id: VECTOR-002, area: VECTOR, name: "Make selection from path", tier: 1, status: missing}
+  - {id: VECTOR-003, area: VECTOR, name: "Fill path / stroke path", tier: 1, status: missing}
+  - {id: VECTOR-004, area: VECTOR, name: "Shape layers with fill and stroke", tier: 1, status: missing}
+  - {id: VECTOR-005, area: VECTOR, name: "Live shape properties (corner radius)", tier: 1, status: missing}
+  - {id: VECTOR-006, area: VECTOR, name: "Path operations (combine, subtract, intersect, exclude)", tier: 1, status: missing}
+  - {id: VECTOR-007, area: VECTOR, name: "Align / distribute paths", tier: 1, status: missing}
+  - {id: VECTOR-008, area: VECTOR, name: "Custom shape presets and legacy shapes", tier: 2, status: missing}
+  - {id: VECTOR-009, area: VECTOR, name: "Clipping path for export", tier: 2, status: missing}
+  - {id: VECTOR-010, area: VECTOR, name: "Export paths to Illustrator", tier: 2, status: missing}
+  - {id: VECTOR-011, area: VECTOR, name: "Pen options (rubber band, auto add / delete)", tier: 2, status: missing}
+  - {id: VECTOR-012, area: VECTOR, name: "Star and polygon options", tier: 2, status: missing}
+  - {id: VECTOR-013, area: VECTOR, name: "Arrowheads on lines", tier: 2, status: missing}
+  - {id: VECTOR-014, area: VECTOR, name: "Shape stroke options (dash, alignment, caps, joins)", tier: 1, status: missing}
+  - {id: VECTOR-015, area: VECTOR, name: "Copy SVG / paste vector data", tier: 2, status: missing}
+
+  # ---- VIEW: View, navigation and measurement (Photoshop User Guide: Use grids and measurement guides; Overview of navigation and measuring tools)
+  - {id: VIEW-001, area: VIEW, name: "Zoom in / out / fit / 100% commands", tier: 0, status: functional, evidence: ["ctest:gui-smoke"]}
+  - {id: VIEW-002, area: VIEW, name: "Scrubby and animated zoom", tier: 2, status: missing}
+  - {id: VIEW-003, area: VIEW, name: "Navigator panel", tier: 1, status: functional, evidence: ["ctest:gui-smoke"]}
+  - {id: VIEW-004, area: VIEW, name: "Rulers", tier: 1, status: missing}
+  - {id: VIEW-005, area: VIEW, name: "Guides (create, move, lock, clear)", tier: 1, status: missing}
+  - {id: VIEW-006, area: VIEW, name: "New Guide Layout", tier: 2, status: missing}
+  - {id: VIEW-007, area: VIEW, name: "Grid", tier: 1, status: missing}
+  - {id: VIEW-008, area: VIEW, name: "Smart Guides", tier: 1, status: missing}
+  - {id: VIEW-009, area: VIEW, name: "Snap to guides, grid, layers, document bounds", tier: 1, status: missing}
+  - {id: VIEW-010, area: VIEW, name: "Pixel Grid display", tier: 1, status: missing}
+  - {id: VIEW-011, area: VIEW, name: "Show / hide Extras", tier: 1, status: missing}
+  - {id: VIEW-012, area: VIEW, name: "Tabbed documents and window arrangement", tier: 1, status: missing}
+  - {id: VIEW-013, area: VIEW, name: "New Window for the same document", tier: 2, status: missing}
+  - {id: VIEW-014, area: VIEW, name: "Info panel (color readout, coordinates)", tier: 1, status: missing}
+  - {id: VIEW-015, area: VIEW, name: "Histogram panel", tier: 1, status: missing}
+  - {id: VIEW-016, area: VIEW, name: "Record Measurements / measurement log", tier: 2, status: missing}
+  - {id: VIEW-017, area: VIEW, name: "Measurement scale", tier: 2, status: missing}
+  - {id: VIEW-018, area: VIEW, name: "Transparency checkerboard display", tier: 1, status: missing}
+  - {id: VIEW-019, area: VIEW, name: "Units and rulers preferences", tier: 1, status: missing}
+  - {id: VIEW-020, area: VIEW, name: "Pixel aspect ratio correction", tier: 2, status: missing}
+  - {id: VIEW-021, area: VIEW, name: "GPU-accelerated canvas with software fallback", tier: 1, status: functional, evidence: ["ctest:gui-gl-canvas", "ctest:gui-smoke"], note: "OpenGL 3.3 canvas with a QPainter raster fallback (RASTERLOOM_CANVAS=gl|raster)"}
+  - {id: VIEW-022, area: VIEW, name: "32-bit preview options", tier: 2, status: missing}
+
+  # ---- WS: Workspace and application (Photoshop User Guide: Workspace overview; Settings and preferences; Troubleshoot)
+  - {id: WS-001, area: WS, name: "Dockable, floating and stacked panels", tier: 1, status: functional, evidence: ["ctest:gui-smoke"], note: "Qt-Advanced-Docking-System"}
+  - {id: WS-002, area: WS, name: "Save / switch / reset workspaces", tier: 1, status: functional, evidence: ["ctest:gui-smoke"], note: "saved perspectives and Reset Layout"}
+  - {id: WS-003, area: WS, name: "Layers panel", tier: 0, status: functional, evidence: ["ctest:gui-smoke"]}
+  - {id: WS-004, area: WS, name: "Properties panel", tier: 1, status: missing}
+  - {id: WS-005, area: WS, name: "Channels panel", tier: 1, status: missing}
+  - {id: WS-006, area: WS, name: "Tool options bar", tier: 1, status: functional, evidence: ["ctest:gui-smoke"]}
+  - {id: WS-007, area: WS, name: "Home screen / recent files", tier: 1, status: missing}
+  - {id: WS-008, area: WS, name: "Discover panel and in-app learning", tier: 2, status: wontfix, wontfix_reason: "depends on an Adobe cloud account service"}
+  - {id: WS-009, area: WS, name: "Performance preferences (memory usage)", tier: 1, status: missing}
+  - {id: WS-010, area: WS, name: "Scratch disks", tier: 1, status: missing}
+  - {id: WS-011, area: WS, name: "Auto-save and crash recovery", tier: 1, status: missing}
+  - {id: WS-012, area: WS, name: "Background save", tier: 1, status: missing}
+  - {id: WS-013, area: WS, name: "High-DPI and per-monitor UI scaling", tier: 1, status: missing}
+  - {id: WS-014, area: WS, name: "Interface color themes", tier: 2, status: missing}
+  - {id: WS-015, area: WS, name: "Native plug-in API", tier: 2, status: missing}
+  - {id: WS-016, area: WS, name: "UI localization", tier: 2, status: missing}
+  - {id: WS-017, area: WS, name: "Creative Cloud Libraries panel", tier: 2, status: wontfix, wontfix_reason: "depends on an Adobe cloud account service"}
+  - {id: WS-018, area: WS, name: "Share for review / comments", tier: 2, status: wontfix, wontfix_reason: "depends on an Adobe cloud account service"}
+  - {id: WS-019, area: WS, name: "Large canvas support (up to 300,000 px per side)", tier: 1, status: missing, note: "v0.1 caps canvases at 16384 px per side"}
+  - {id: WS-020, area: WS, name: "Rich tooltips", tier: 2, status: missing}
+
+  # ---- HIST: History (Photoshop User Guide: Use Undo and Redo commands; History panel settings)
+  - {id: HIST-001, area: HIST, name: "History panel with states", tier: 1, status: functional, evidence: ["ctest:gui-smoke", "ctest:gui-session"], note: "50 states by default, one per gesture, click to step back"}
+  - {id: HIST-002, area: HIST, name: "History depth limit", tier: 1, status: functional, evidence: ["ctest:History.DepthDropsOldestRecords"], note: "depth 1000 in scripts; GUI preference not present"}
+  - {id: HIST-003, area: HIST, name: "Snapshots", tier: 1, status: missing}
+  - {id: HIST-004, area: HIST, name: "Non-linear history", tier: 2, status: missing}
+  - {id: HIST-005, area: HIST, name: "History log", tier: 2, status: missing}
+  - {id: HIST-006, area: HIST, name: "Copy-on-write history (low memory per state)", tier: 1, status: functional, evidence: ["ctest:History.SnapshotsShareTilesAndUndoRestores"]}
+
+  # ---- AUTO: Automation (Photoshop User Guide: Automate tasks)
+  - {id: AUTO-001, area: AUTO, name: "Actions panel: record and play", tier: 1, status: missing}
+  - {id: AUTO-002, area: AUTO, name: "Action sets: load / save", tier: 2, status: missing}
+  - {id: AUTO-003, area: AUTO, name: "Insert stop / conditional actions", tier: 2, status: missing}
+  - {id: AUTO-004, area: AUTO, name: "Batch processing", tier: 1, status: missing}
+  - {id: AUTO-005, area: AUTO, name: "Droplets", tier: 2, status: missing}
+  - {id: AUTO-006, area: AUTO, name: "Image Processor", tier: 2, status: missing}
+  - {id: AUTO-007, area: AUTO, name: "Scripting API", tier: 1, status: missing, note: "the render-script grammar (docs/math) is the future scripting API"}
+  - {id: AUTO-008, area: AUTO, name: "Script Events Manager", tier: 2, status: missing}
+  - {id: AUTO-009, area: AUTO, name: "Load Files into Stack", tier: 2, status: missing}
+  - {id: AUTO-010, area: AUTO, name: "Photomerge panoramas", tier: 2, status: missing}
+  - {id: AUTO-011, area: AUTO, name: "Merge to HDR Pro", tier: 2, status: missing}
+  - {id: AUTO-012, area: AUTO, name: "Contact Sheet II", tier: 2, status: missing}
+  - {id: AUTO-013, area: AUTO, name: "Crop and Straighten Photos", tier: 2, status: missing}
+  - {id: AUTO-014, area: AUTO, name: "Fit Image", tier: 2, status: missing}
+  - {id: AUTO-015, area: AUTO, name: "Conditional Mode Change", tier: 2, status: missing}
+
+  # ---- AI: Generative and neural features (Photoshop User Guide: Generative AI in Photoshop; Neural filters)
+  - {id: AI-001, area: AI, name: "Generative Fill", tier: 2, status: wontfix, wontfix_reason: "server-side generative AI (Adobe Firefly / cloud service); no local equivalent can be shipped"}
+  - {id: AI-002, area: AI, name: "Generative Expand", tier: 2, status: wontfix, wontfix_reason: "server-side generative AI (Adobe Firefly / cloud service); no local equivalent can be shipped"}
+  - {id: AI-003, area: AI, name: "Generate Image", tier: 2, status: wontfix, wontfix_reason: "server-side generative AI (Adobe Firefly / cloud service); no local equivalent can be shipped"}
+  - {id: AI-004, area: AI, name: "Generate Background", tier: 2, status: wontfix, wontfix_reason: "server-side generative AI (Adobe Firefly / cloud service); no local equivalent can be shipped"}
+  - {id: AI-005, area: AI, name: "Generate Similar / variations", tier: 2, status: wontfix, wontfix_reason: "server-side generative AI (Adobe Firefly / cloud service); no local equivalent can be shipped"}
+  - {id: AI-006, area: AI, name: "Reference Image for generation", tier: 2, status: wontfix, wontfix_reason: "server-side generative AI (Adobe Firefly / cloud service); no local equivalent can be shipped"}
+  - {id: AI-007, area: AI, name: "Generative Upscale", tier: 2, status: wontfix, wontfix_reason: "server-side generative AI (Adobe Firefly / cloud service); no local equivalent can be shipped"}
+  - {id: AI-008, area: AI, name: "Harmonize", tier: 2, status: wontfix, wontfix_reason: "server-side generative AI (Adobe Firefly / cloud service); no local equivalent can be shipped"}
+  - {id: AI-009, area: AI, name: "Enhance Detail", tier: 2, status: wontfix, wontfix_reason: "server-side generative AI (Adobe Firefly / cloud service); no local equivalent can be shipped"}
+  - {id: AI-010, area: AI, name: "Partner / alternative AI model selection", tier: 2, status: wontfix, wontfix_reason: "server-side generative AI (Adobe Firefly / cloud service); no local equivalent can be shipped"}
+  - {id: AI-011, area: AI, name: "Remove Background", tier: 1, status: missing, note: "BUILD-SPEC phase 0.5 allows optional ONNX segmentation"}
+  - {id: AI-012, area: AI, name: "Remove tool generative mode / distraction removal", tier: 2, status: wontfix, wontfix_reason: "server-side generative AI (Adobe Firefly / cloud service); no local equivalent can be shipped"}
+  - {id: AI-013, area: AI, name: "Neural Filter: Skin Smoothing", tier: 2, status: wontfix, wontfix_reason: "proprietary Adobe ML model; not reproducible without Adobe's model"}
+  - {id: AI-014, area: AI, name: "Neural Filter: Smart Portrait", tier: 2, status: wontfix, wontfix_reason: "proprietary Adobe ML model; not reproducible without Adobe's model"}
+  - {id: AI-015, area: AI, name: "Neural Filter: Makeup Transfer", tier: 2, status: wontfix, wontfix_reason: "proprietary Adobe ML model; not reproducible without Adobe's model"}
+  - {id: AI-016, area: AI, name: "Neural Filter: Landscape Mixer", tier: 2, status: wontfix, wontfix_reason: "proprietary Adobe ML model; not reproducible without Adobe's model"}
+  - {id: AI-017, area: AI, name: "Neural Filter: Style Transfer", tier: 2, status: wontfix, wontfix_reason: "proprietary Adobe ML model; not reproducible without Adobe's model"}
+  - {id: AI-018, area: AI, name: "Neural Filter: Colorize", tier: 2, status: wontfix, wontfix_reason: "proprietary Adobe ML model; not reproducible without Adobe's model"}
+  - {id: AI-019, area: AI, name: "Neural Filter: Super Zoom", tier: 2, status: wontfix, wontfix_reason: "proprietary Adobe ML model; not reproducible without Adobe's model"}
+  - {id: AI-020, area: AI, name: "Neural Filter: Depth Blur", tier: 2, status: wontfix, wontfix_reason: "proprietary Adobe ML model; not reproducible without Adobe's model"}
+  - {id: AI-021, area: AI, name: "Neural Filter: JPEG Artifacts Removal", tier: 2, status: wontfix, wontfix_reason: "proprietary Adobe ML model; not reproducible without Adobe's model"}
+  - {id: AI-022, area: AI, name: "Neural Filter: Photo Restoration", tier: 2, status: wontfix, wontfix_reason: "proprietary Adobe ML model; not reproducible without Adobe's model"}
+  - {id: AI-023, area: AI, name: "Neural Filter: Harmonization", tier: 2, status: wontfix, wontfix_reason: "proprietary Adobe ML model; not reproducible without Adobe's model"}
+  - {id: AI-024, area: AI, name: "Neural Filter: Color Transfer", tier: 2, status: wontfix, wontfix_reason: "proprietary Adobe ML model; not reproducible without Adobe's model"}
+  - {id: AI-025, area: AI, name: "Adobe Stock search and licensing", tier: 2, status: wontfix, wontfix_reason: "licensed proprietary content library (Pantone/Adobe Stock/Adobe Fonts)"}
+
+  # ---- VIDEO: Video, animation, 3D and print (Photoshop User Guide: Add video and animation; Print)
+  - {id: VIDEO-001, area: VIDEO, name: "Frame animation (Timeline frames, tweening)", tier: 2, status: missing}
+  - {id: VIDEO-002, area: VIDEO, name: "Video timeline and video layers", tier: 2, status: missing}
+  - {id: VIDEO-003, area: VIDEO, name: "Onion skins", tier: 2, status: missing}
+  - {id: VIDEO-004, area: VIDEO, name: "Export animated GIF", tier: 2, status: missing}
+  - {id: VIDEO-005, area: VIDEO, name: "Render video (MP4 / image sequence)", tier: 2, status: missing}
+  - {id: VIDEO-006, area: VIDEO, name: "Audio tracks in the timeline", tier: 2, status: missing}
+  - {id: VIDEO-007, area: VIDEO, name: "3D layers and 3D panel", tier: 2, status: wontfix, wontfix_reason: "Adobe discontinued Photoshop 3D (removed in 2023); not a live Photoshop capability to match"}
+  - {id: VIDEO-008, area: VIDEO, name: "3D printing", tier: 2, status: wontfix, wontfix_reason: "Adobe discontinued Photoshop 3D (removed in 2023); not a live Photoshop capability to match"}
+  - {id: VIDEO-009, area: VIDEO, name: "Print settings dialog (page setup, position, scale)", tier: 2, status: missing}
+  - {id: VIDEO-010, area: VIDEO, name: "Printer color management in the Print dialog", tier: 2, status: missing}

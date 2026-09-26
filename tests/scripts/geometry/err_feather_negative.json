@@ -1,0 +1,10 @@
+{
+  "canvas": {"w": 64, "h": 64, "bg": "#00000000"},
+  "ops": [
+    {"op": "add_layer", "id": "L"},
+    {"op": "select_rect", "x": 4.0, "y": 4.0, "w": 8.0, "h": 8.0},
+    {"op": "feather", "radius": -1.0}
+  ],
+  "out": "png8",
+  "expect": "error"
+}

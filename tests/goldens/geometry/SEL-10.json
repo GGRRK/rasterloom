@@ -1,0 +1,9 @@
+{
+  "canvas": {"w": 64, "h": 64, "bg": "#00000000"},
+  "ops": [
+    {"op": "add_layer", "id": "L"},
+    {"op": "select_polygon", "points": [[-10.0, 10.0], [70.0, 20.0], [30.0, 30.0], [70.0, 50.0], [-5.0, 60.0]], "antialias": false},
+    {"op": "fill_selection", "layer": "L", "color": "#1060e0ff"}
+  ],
+  "out": "png8"
+}

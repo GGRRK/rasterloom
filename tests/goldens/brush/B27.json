@@ -1,0 +1,8 @@
+{
+  "canvas": {"w": 64, "h": 64, "bg": "#00000000"},
+  "ops": [
+    {"op": "add_layer", "id": "L"},
+    {"op": "brush_stroke", "layer": "L", "size": 16.0, "samples": [{"x": -20.0, "y": -10.0}, {"x": 90.0, "y": 70.0, "t_ms": 30.0}]}
+  ],
+  "out": "png8"
+}

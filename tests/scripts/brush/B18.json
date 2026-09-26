@@ -1,0 +1,10 @@
+{
+  "canvas": {"w": 128, "h": 128, "bg": "#ffffffff"},
+  "ops": [
+    {"op": "add_layer", "id": "L"},
+    {"op": "select_ellipse", "x": 32.0, "y": 40.0, "w": 64.0, "h": 48.0, "antialias": true},
+    {"op": "feather", "radius": 8.0},
+    {"op": "brush_stroke", "layer": "L", "color": "#1E3A8A", "size": 22.0, "hardness": 0.7, "opacity": 0.6, "flow": 0.5, "mode": "wash", "samples": [{"x": 8.0, "y": 60.0, "t_ms": 0.0}, {"x": 120.0, "y": 68.0, "t_ms": 8.0}, {"x": 8.0, "y": 76.0, "t_ms": 16.0}, {"x": 120.0, "y": 60.0, "t_ms": 24.0}]}
+  ],
+  "out": "png8"
+}

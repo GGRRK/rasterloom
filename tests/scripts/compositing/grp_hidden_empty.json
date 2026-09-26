@@ -1,0 +1,16 @@
+{
+  "canvas": {"w": 128, "h": 128, "bg": "#00000000"},
+  "ops": [
+    {"op": "add_layer", "id": "k", "fill": "gradient", "from": "#2040C0FF", "to": "#F0C020FF", "dir": "h"},
+    {"op": "add_group", "id": "e1", "mode": "pass"},
+    {"op": "add_group", "id": "e2", "mode": "isolated"},
+    {"op": "add_group", "id": "h", "mode": "pass"},
+    {"op": "add_layer", "id": "h1", "parent": "h", "fill": "solid", "color": "#E03020FF", "rect": [16, 16, 64, 64]},
+    {"op": "add_layer", "id": "h2", "parent": "h", "fill": "solid", "color": "#20A0F0FF", "rect": [48, 40, 64, 64]},
+    {"op": "set_visible", "layer": "h", "value": false},
+    {"op": "add_group", "id": "v", "mode": "isolated"},
+    {"op": "add_layer", "id": "v1", "parent": "v", "fill": "solid", "color": "#10E080FF", "rect": [32, 32, 64, 64]},
+    {"op": "set_visible", "layer": "v1", "value": false}
+  ],
+  "out": "png8"
+}

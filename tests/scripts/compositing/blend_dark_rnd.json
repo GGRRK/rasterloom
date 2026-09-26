@@ -1,0 +1,10 @@
+{
+  "canvas": {"w": 256, "h": 256, "bg": "#00000000"},
+  "ops": [
+    {"op": "add_layer", "id": "b", "fill": "noise", "seed": 21, "alpha": "random"},
+    {"op": "add_layer", "id": "s", "fill": "noise", "seed": 22, "alpha": "random"},
+    {"op": "set_opacity", "layer": "s", "value": 0.75},
+    {"op": "set_blend", "layer": "s", "mode": "dark", "seed": 7}
+  ],
+  "out": "png8"
+}

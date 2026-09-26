@@ -1,0 +1,10 @@
+{
+  "canvas": {"w": 192, "h": 96, "bg": "#00000000"},
+  "ops": [
+    {"op": "add_layer", "id": "base", "fill": "gradient", "from": "#ff0000ff", "to": "#0000ffff", "dir": "h"},
+    {"op": "add_layer", "id": "top", "fill": "gradient", "from": "#00ff00ff", "to": "#00ff0000", "dir": "v"},
+    {"op": "add_layer", "id": "grey", "fill": "gradient", "from": "#20202080", "to": "#e0e0e080", "dir": "h"},
+    {"op": "add_adjustment", "id": "adj", "type": "curves", "params": {"g": [[0, 30], [128, 100], [255, 255]], "rgb": [[0, 0], [90, 140], [255, 255]]}}
+  ],
+  "out": "png8"
+}

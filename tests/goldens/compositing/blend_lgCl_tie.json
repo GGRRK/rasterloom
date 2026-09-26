@@ -1,0 +1,9 @@
+{
+  "canvas": {"w": 16, "h": 16, "bg": "#00000000"},
+  "ops": [
+    {"op": "add_layer", "id": "b", "fill": "solid", "color": "#3B0000FF"},
+    {"op": "add_layer", "id": "s", "fill": "solid", "color": "#001E00FF"},
+    {"op": "set_blend", "layer": "s", "mode": "lgCl"}
+  ],
+  "out": "png8"
+}

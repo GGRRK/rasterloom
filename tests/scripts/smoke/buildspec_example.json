@@ -1,0 +1,7 @@
+{ "canvas": {"w":256,"h":256,"bg":"#00000000"},
+  "ops": [ {"op":"add_layer","id":"bg","fill":"gradient","from":"#000000","to":"#ffffff","dir":"h"},
+           {"op":"add_layer","id":"fg","fill":"gradient","from":"#ff0000","to":"#0000ff","dir":"v"},
+           {"op":"set_blend","layer":"fg","mode":"sLit"},
+           {"op":"set_opacity","layer":"fg","value":0.5},
+           {"op":"flatten"} ],
+  "out": "png8" }

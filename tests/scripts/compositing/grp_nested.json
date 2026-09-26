@@ -1,0 +1,19 @@
+{
+  "canvas": {"w": 128, "h": 128, "bg": "#00000000"},
+  "ops": [
+    {"op": "add_layer", "id": "k", "fill": "gradient", "from": "#2040C0FF", "to": "#F0C020FF", "dir": "h"},
+    {"op": "add_group", "id": "G1", "mode": "pass"},
+    {"op": "set_opacity", "layer": "G1", "value": 0.8},
+    {"op": "add_layer", "id": "n1", "parent": "G1", "fill": "gradient", "from": "#FFD000FF", "to": "#00D0FFFF", "dir": "v", "rect": [8, 8, 96, 96]},
+    {"op": "add_group", "id": "G2", "parent": "G1", "mode": "mul"},
+    {"op": "set_opacity", "layer": "G2", "value": 0.6},
+    {"op": "add_layer", "id": "n2", "parent": "G2", "fill": "solid", "color": "#C0C0FFFF", "rect": [24, 24, 88, 88]},
+    {"op": "add_group", "id": "G3", "parent": "G2", "mode": "pass"},
+    {"op": "set_opacity", "layer": "G3", "value": 0.5},
+    {"op": "add_layer", "id": "o1", "parent": "G3", "fill": "gradient", "from": "#FF0000FF", "to": "#0000FF80", "dir": "h", "rect": [16, 40, 96, 48]},
+    {"op": "set_blend", "layer": "o1", "mode": "over"},
+    {"op": "add_layer", "id": "o2", "parent": "G3", "fill": "noise", "seed": 13, "alpha": "random", "rect": [40, 16, 48, 96]},
+    {"op": "set_blend", "layer": "o2", "mode": "over"}
+  ],
+  "out": "png8"
+}

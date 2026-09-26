@@ -1,0 +1,13 @@
+{
+  "canvas": {"w": 64, "h": 64, "bg": "#00000000"},
+  "ops": [
+    {"op": "add_layer", "id": "k", "fill": "gradient", "from": "#2040C0FF", "to": "#F0C020FF", "dir": "h"},
+    {"op": "add_group", "id": "g"},
+    {"op": "add_layer", "id": "x", "parent": "g", "fill": "solid", "color": "#FFFFFF60", "rect": [0, 0, 16, 16]},
+    {"op": "add_layer", "id": "base", "fill": "gradient", "from": "#FF000000", "to": "#FF0000FF", "dir": "v", "rect": [16, 8, 40, 48]},
+    {"op": "add_layer", "id": "c", "fill": "noise", "seed": 5, "alpha": 128, "rect": [8, 8, 48, 48]},
+    {"op": "set_clip", "layer": "c", "value": true},
+    {"op": "delete_layer", "layer": "base"}
+  ],
+  "out": "png8"
+}

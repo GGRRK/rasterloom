@@ -1,0 +1,9 @@
+{
+  "canvas": {"w": 256, "h": 64, "bg": "#00000000"},
+  "ops": [
+    {"op": "add_layer", "id": "L"},
+    {"op": "brush_stroke", "layer": "L", "size": 16.0, "view_zoom": 4.0, "samples": [{"x": 20.0, "y": 32.0}, {"x": 236.0, "y": 32.0}]}
+  ],
+  "out": "png8",
+  "equal_to": "B05"
+}

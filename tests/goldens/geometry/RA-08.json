@@ -1,0 +1,15 @@
+{
+  "canvas": {"w": 64, "h": 48, "bg": "#ffffffff"},
+  "ops": [
+    {"op": "add_layer", "id": "L"},
+    {"op": "select_ellipse", "x": 6.0, "y": 20.0, "w": 30.0, "h": 20.0, "antialias": true},
+    {"op": "feather", "radius": 3.0},
+    {"op": "fill_selection", "layer": "L", "color": "#ff2000ff"},
+    {"op": "deselect"},
+    {"op": "rotate_canvas", "angle": 90.0},
+    {"op": "rotate_canvas", "angle": 180.0},
+    {"op": "rotate_canvas", "angle": -90.0},
+    {"op": "flip", "axis": "v"}
+  ],
+  "out": "png8"
+}

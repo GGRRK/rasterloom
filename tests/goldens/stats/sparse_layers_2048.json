@@ -1,0 +1,8 @@
+{ "canvas": {"w": 2048, "h": 2048, "bg": "#00000000"},
+  "ops": [ {"op": "add_layer", "id": "tl", "fill": "solid", "color": "#2060C0", "rect": [0, 0, 64, 64]},
+           {"op": "add_layer", "id": "br", "fill": "checker", "a": "#FFFFFF", "b": "#000000", "cell": 4, "rect": [1984, 1984, 64, 64]},
+           {"op": "add_group", "id": "g", "mode": "isolated"},
+           {"op": "add_layer", "id": "mid", "parent": "g", "fill": "gradient", "from": "#FF000080", "to": "#00FF00FF", "dir": "v", "rect": [1000, 1000, 100, 100]},
+           {"op": "add_layer", "id": "none", "parent": "g"},
+           {"op": "set_blend", "layer": "mid", "mode": "mul"} ],
+  "out": "png8" }

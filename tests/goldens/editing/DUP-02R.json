@@ -1,0 +1,18 @@
+{
+  "canvas": {"w": 64, "h": 64, "bg": "#00000000"},
+  "ops": [
+    {"op": "add_layer", "id": "k", "fill": "gradient", "from": "#2040C0FF", "to": "#F0C020FF", "dir": "h"},
+    {"op": "add_layer", "id": "u", "fill": "noise", "seed": 9, "alpha": "random"},
+    {"op": "add_mask", "layer": "u", "fill": "gradient", "from": 255, "to": 0, "dir": "v"},
+    {"op": "set_mask_enabled", "layer": "u", "value": false},
+    {"op": "set_blend", "layer": "u", "mode": "diss", "seed": 77},
+    {"op": "set_fill", "layer": "u", "value": 0.6},
+    {"op": "set_opacity", "layer": "u", "value": 0.7},
+    {"op": "lock_transparency", "layer": "u", "value": true},
+    {"op": "set_mask_enabled", "layer": "u", "value": true},
+    {"op": "select_rect", "x": 0.0, "y": 0.0, "w": 32.0, "h": 64.0},
+    {"op": "fill_selection", "layer": "u", "color": "#102030ff"},
+    {"op": "deselect"}
+  ],
+  "out": "png8"
+}

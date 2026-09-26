@@ -1,0 +1,15 @@
+{
+  "canvas": {"w": 64, "h": 64, "bg": "#00000000"},
+  "ops": [
+    {"op": "add_layer", "id": "L"},
+    {"op": "select_rect", "x": 4.0, "y": 4.0, "w": 16.0, "h": 16.0},
+    {"op": "select_rect", "x": 40.0, "y": 40.0, "w": 16.0, "h": 16.0, "mode": "add"},
+    {"op": "fill_selection", "layer": "L", "color": "#000000ff"},
+    {"op": "select_rect", "x": 40.0, "y": 4.0, "w": 16.0, "h": 16.0},
+    {"op": "fill_selection", "layer": "L", "color": "#141414ff"},
+    {"op": "deselect"},
+    {"op": "select_wand", "layer": "L", "x": 8, "y": 8, "tolerance": 20, "contiguous": false, "antialias": false},
+    {"op": "fill_selection", "layer": "L", "color": "#1060e0ff"}
+  ],
+  "out": "png8"
+}

@@ -1,0 +1,9 @@
+{
+  "canvas": {"w": 128, "h": 128, "bg": "#00000000"},
+  "ops": [
+    {"op": "add_layer", "id": "u", "fill": "solid", "color": "#FF8000FF"},
+    {"op": "set_opacity", "layer": "u", "value": 0.001},
+    {"op": "add_layer", "id": "v", "fill": "gradient", "from": "#00FF0000", "to": "#00FF0004", "dir": "h", "rect": [64, 0, 64, 128]}
+  ],
+  "out": "png8"
+}

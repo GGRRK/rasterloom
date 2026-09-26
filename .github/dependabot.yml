@@ -1,0 +1,22 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Keep GitHub Actions current, but NEVER let a bot bump Qt: Qt 6.10 renamed the platform plugins,
+# which makes linuxdeploy-plugin-qt silently drop the Wayland plugins (BUILD-SPEC <guardrails>).
+# Qt is pinned to 6.9.3 in .github/workflows/ci.yml (QT_VERSION) and changes only by hand.
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    ignore:
+      - dependency-name: "jurplel/install-qt-action"
+      - dependency-name: "*qt*"
+  - package-ecosystem: pip
+    directory: /tools
+    schedule:
+      interval: monthly
+    ignore:
+      - dependency-name: aqtinstall
+      - dependency-name: "*qt*"
+      - dependency-name: "PyQt*"
+      - dependency-name: "PySide*"

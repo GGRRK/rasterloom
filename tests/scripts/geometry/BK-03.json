@@ -1,0 +1,10 @@
+{
+  "canvas": {"w": 64, "h": 64, "bg": "#00000000"},
+  "ops": [
+    {"op": "add_layer", "id": "L"},
+    {"op": "gradient", "layer": "L", "type": "linear", "p0": [0.0, 0.0], "p1": [64.0, 0.0], "c0": "#000000ff", "c1": "#ffffffff"},
+    {"op": "select_rect", "x": 0.0, "y": 0.0, "w": 40.0, "h": 64.0},
+    {"op": "bucket_fill", "layer": "L", "x": 10, "y": 32, "color": "#00ffffff", "opacity": 0.6, "tolerance": 24}
+  ],
+  "out": "png8"
+}

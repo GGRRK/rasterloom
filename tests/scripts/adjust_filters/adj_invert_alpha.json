@@ -1,0 +1,8 @@
+{
+  "canvas": {"w": 128, "h": 32, "bg": "#00000000"},
+  "ops": [
+    {"op": "add_layer", "id": "base", "fill": "gradient", "from": "#ff800000", "to": "#3060ffff", "dir": "h"},
+    {"op": "add_adjustment", "id": "adj", "type": "invert"}
+  ],
+  "out": "png8"
+}

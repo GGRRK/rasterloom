@@ -1,0 +1,10 @@
+{
+  "canvas": {"w": 64, "h": 64, "bg": "#00000000"},
+  "ops": [
+    {"op": "add_layer", "id": "L"},
+    {"op": "gradient", "layer": "L", "type": "linear", "p0": [0.0, 0.0], "p1": [64.0, 0.0], "c0": "#000000ff", "c1": "#ffffffff"},
+    {"op": "select_wand", "layer": "L", "x": 10, "y": 32, "tolerance": 40, "antialias": true},
+    {"op": "fill_selection", "layer": "L", "color": "#1060e0ff"}
+  ],
+  "out": "png8"
+}

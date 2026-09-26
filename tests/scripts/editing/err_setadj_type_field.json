@@ -1,0 +1,10 @@
+{
+  "canvas": {"w": 64, "h": 64, "bg": "#00000000"},
+  "ops": [
+    {"op": "add_layer", "id": "k", "fill": "gradient", "from": "#2040C0FF", "to": "#F0C020FF", "dir": "h"},
+    {"op": "add_adjustment", "id": "a", "type": "posterize", "params": {"levels": 3}},
+    {"op": "set_adjustment", "layer": "a", "type": "posterize", "params": {"levels": 5}}
+  ],
+  "out": "png8",
+  "expect": "error"
+}

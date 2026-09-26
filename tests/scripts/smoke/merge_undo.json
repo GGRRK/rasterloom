@@ -1,0 +1,20 @@
+{ "canvas": {"w":100,"h":70,"bg":"#808080FF"},
+  "ops": [
+    {"op":"add_layer","id":"k","fill":"gradient","from":"#2040C0FF","to":"#F0C020FF","dir":"h"},
+    {"op":"add_layer","id":"u","fill":"noise","seed":8,"alpha":200},
+    {"op":"set_blend","layer":"u","mode":"hLit"},
+    {"op":"set_opacity","layer":"u","value":0.5},
+    {"op":"add_mask","layer":"u","fill":"noise","seed":12},
+    {"op":"merge_down","layer":"u"},
+    {"op":"set_opacity","layer":"k","value":0.8},
+    {"op":"add_layer","id":"h","fill":"solid","color":"#00FF0080"},
+    {"op":"set_visible","layer":"h","value":false},
+    {"op":"add_layer","id":"t","fill":"solid","color":"#FF00FF","rect":[10,10,30,30]},
+    {"op":"set_blend","layer":"t","mode":"lum"},
+    {"op":"add_layer","id":"junk","fill":"solid","color":"#FFFFFF"},
+    {"op":"undo","steps":1},
+    {"op":"merge_visible","id":"mv"},
+    {"op":"set_visible","layer":"h","value":true},
+    {"op":"move_layer","id":"h","index":0}
+  ],
+  "out": "png8" }

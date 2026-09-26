@@ -1,0 +1,9 @@
+{
+  "canvas": {"w": 128, "h": 128, "bg": "#FF000080"},
+  "ops": [
+    {"op": "add_layer", "id": "u", "fill": "gradient", "from": "#0000FFFF", "to": "#00FF0040", "dir": "h", "rect": [16, 16, 96, 96]},
+    {"op": "set_blend", "layer": "u", "mode": "scrn"},
+    {"op": "flatten"}
+  ],
+  "out": "png8"
+}

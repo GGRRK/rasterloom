@@ -1,0 +1,81 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Third-party components that ship inside (or are compiled into) Rasterloom binaries.
+# tools/gen_third_party_notices.py turns this into THIRD-PARTY-NOTICES.md for a release.
+#
+# Per component:
+#   name, spdx, url, used_for
+#   version        fixed string, or omitted and resolved from version_from
+#   version_from   list tried in order: "pkg-config:<module>" or "cmd:<command printing a version>"
+#   license_files  candidate paths tried in order; the first that exists is embedded verbatim.
+#                  Relative paths are relative to the repository root. Arch keeps texts in
+#                  /usr/share/licenses/<pkg>/, Debian/Ubuntu in /usr/share/doc/<pkg>/copyright.
+# Test-only tools (GoogleTest, NumPy, Pillow, psd-tools) are not shipped and are not listed.
+components:
+  - name: libpng
+    spdx: libpng-2.0
+    url: http://www.libpng.org/pub/png/libpng.html
+    used_for: PNG import/export
+    version_from: ["pkg-config:libpng16"]
+    license_files: [/usr/share/licenses/libpng/LICENSE, /usr/share/doc/libpng16-16/copyright,
+                    /usr/share/doc/libpng-dev/copyright]
+  - name: zlib
+    spdx: Zlib
+    url: https://zlib.net/
+    used_for: PNG, PSD and ZIP (.orp/.ora) compression
+    version_from: ["pkg-config:zlib"]
+    license_files: [/usr/share/licenses/zlib/LICENSE, /usr/share/doc/zlib1g/copyright,
+                    /usr/share/doc/zlib1g-dev/copyright]
+  - name: LZ4 (liblz4)
+    spdx: BSD-2-Clause
+    url: https://lz4.org/
+    used_for: compression of warm/cold tiles in memory and in the scratch file
+    version_from: ["pkg-config:liblz4"]
+    license_files: [/usr/share/licenses/lz4/LICENSE, /usr/share/doc/liblz4-1/copyright,
+                    /usr/share/doc/liblz4-dev/copyright]
+  - name: libjpeg-turbo
+    spdx: IJG AND BSD-3-Clause AND Zlib
+    url: https://libjpeg-turbo.org/
+    used_for: JPEG import/export, PSD JPEG thumbnails
+    version_from: ["pkg-config:libjpeg", "pkg-config:libturbojpeg"]
+    license_files: [/usr/share/licenses/libjpeg-turbo/LICENSE.md,
+                    /usr/share/doc/libjpeg-turbo8/copyright, /usr/share/doc/libjpeg-turbo8-dev/copyright]
+  - name: libtiff
+    spdx: libtiff
+    url: https://libtiff.gitlab.io/libtiff/
+    used_for: TIFF import/export
+    version_from: ["pkg-config:libtiff-4"]
+    license_files: [/usr/share/licenses/libtiff/LICENSE.md, /usr/share/doc/libtiff5/copyright,
+                    /usr/share/doc/libtiff-dev/copyright]
+  - name: libzip
+    spdx: BSD-3-Clause
+    url: https://libzip.org/
+    used_for: OpenRaster (.orp/.ora) container
+    version_from: ["pkg-config:libzip"]
+    license_files: [/usr/share/licenses/libzip/LICENSE, /usr/share/doc/libzip4/copyright,
+                    /usr/share/doc/libzip-dev/copyright]
+  - name: Little CMS (lcms2)
+    spdx: MIT
+    url: https://www.littlecms.com/
+    used_for: ICC colour management
+    version_from: ["pkg-config:lcms2"]
+    license_files: [/usr/share/licenses/lcms2/LICENSE, /usr/share/doc/liblcms2-2/copyright,
+                    /usr/share/doc/liblcms2-dev/copyright]
+  - name: Qt (Core, Gui, Widgets, Concurrent, Svg, OpenGLWidgets, WaylandClient)
+    spdx: LGPL-3.0-only
+    url: https://www.qt.io/
+    used_for: GUI toolkit, dynamically linked as shared libraries (never statically)
+    version_from: ["pkg-config:Qt6Core", "cmd:qmake6 -query QT_VERSION", "cmd:qmake -query QT_VERSION"]
+    license_files: [/usr/share/licenses/qt6-base/LGPL-3.0-only.txt, COPYING.LESSER]
+  - name: Qt-Advanced-Docking-System
+    spdx: LGPL-2.1-or-later
+    url: https://github.com/githubuser0xFFFF/Qt-Advanced-Docking-System
+    used_for: dockable panels, linked as a shared library
+    version: 5.1.1
+    license_files: [build/_deps/qtads-src/LICENSE, data/licenses/LGPL-2.1.txt]
+  - name: JSON for Modern C++ (nlohmann-json)
+    spdx: MIT
+    url: https://github.com/nlohmann/json
+    used_for: render scripts and document.json (header-only, compiled in)
+    version_from: ["pkg-config:nlohmann_json"]
+    license_files: [/usr/share/licenses/nlohmann-json/LICENSE.MIT,
+                    /usr/share/doc/nlohmann-json3-dev/copyright]
