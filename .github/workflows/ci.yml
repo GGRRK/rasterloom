@@ -57,7 +57,7 @@ jobs:
 
       - name: Restore Qt ${{ env.QT_VERSION }}
         id: qt-cache
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: /opt/qt
           key: qt-${{ env.QT_VERSION }}-${{ env.QT_ARCH }}-icu-qtbase-qtsvg-qtwayland-v1
@@ -71,7 +71,7 @@ jobs:
           find "$QT_DIR/plugins/platforms" -name '*.so' | grep -E 'libqwayland(-generic)?\.so'
 
       - name: Restore ccache
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: ${{ env.CCACHE_DIR }}
           key: ccache-gcc11-qt${{ env.QT_VERSION }}-${{ github.sha }}
@@ -203,7 +203,7 @@ jobs:
 
       - name: Restore Qt ${{ env.QT_VERSION }}
         id: qt-cache
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: /opt/qt
           key: qt-${{ env.QT_VERSION }}-${{ env.QT_ARCH }}-icu-qtbase-qtsvg-qtwayland-v1
@@ -216,7 +216,7 @@ jobs:
           test -f "$QT_DIR/lib/cmake/Qt6/Qt6Config.cmake"
 
       - name: Restore ccache
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: ${{ env.CCACHE_DIR }}
           key: ccache-gcc11-qt${{ env.QT_VERSION }}-pkg-${{ github.sha }}
@@ -225,7 +225,7 @@ jobs:
             ccache-gcc11-qt${{ env.QT_VERSION }}-
 
       - name: Restore pinned packaging tools
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: packaging/_tools
           key: pkgtools-${{ hashFiles('packaging/build-appimage.sh') }}
